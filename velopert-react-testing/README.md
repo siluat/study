@@ -4,7 +4,7 @@
 
 ## 2. 자바스크립트 테스팅의 기초
 
-> 코드 : [/velopert-react-testing/resct-testing-2](/velopert-react-testing/resct-testing-2)
+> 코드 : [/velopert-react-testing/react-testing-2](/velopert-react-testing/react-testing-2)
 
 - [Jest](https://jestjs.io/)를 사용합니다.
 - @types/jest를 설치하면 VS Code에서 인텔리센스 지원을 받을 수 있습니다.
