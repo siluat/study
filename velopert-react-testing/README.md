@@ -9,3 +9,7 @@
 - [Jest](https://jestjs.io/)를 사용합니다.
 - @types/jest를 설치하면 VS Code에서 인텔리센스 지원을 받을 수 있습니다.
 - `test`와 `it`의 작동방식은 완전히 똑같습니다.
+
+## 3. TDD의 소개
+
+> 코드 : [/velopert-react-testing/react-testing-3](/velopert-react-testing/react-testing-3)
