@@ -1,0 +1,13 @@
+{
+  "name": "react-testing-2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@types/jest": "^25.1.2",
+    "jest": "^25.1.0"
+  },
+  "scripts": {
+    "test": "jest --watchAll --verbose"
+  }
+}
