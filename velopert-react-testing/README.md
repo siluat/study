@@ -126,3 +126,45 @@ it("increases", () => {
   expect(number.text()).toBe("2");
 });
 ```
+
+## 6. react-testing-library 를 사용한 리액트 컴포넌트 테스트
+
+> 코드 : [/velopert-react-testing/react-testing-5](/velopert-react-testing/react-testing-6)
+
+- Enzyme 과 달리 모든 테스트를 DOM 위주로 진행, 컴포넌트의 props 나 state 를 조회하는 일은 없음
+- Enzyme 은 엄청나게 다양한 기능을 제공하는 반면, react-testing-library 에는 정말 필요한 기능들만 지원을 해줘서 매우 가볍움
+
+```js
+it("matches snapshot", () => {
+  const utils = render(<Profile username="siluat" name="siluat" />);
+  expect(utils.container).toMatchSnapshot();
+});
+it("shows the props correctly", () => {
+  const utils = render(<Profile username="siluat" name="siluat" />);
+  utils.getByText("siluat");
+  utils.getByText("(siluat)");
+  utils.getByText(/\(sil/);
+});
+```
+
+- render 함수를 사용하여 컴포넌트를 렌더링
+- render 함수가 반환하는 객체가 가지고 있는 쿼리 함수들로 렌더링된 컴포넌트 내부 DOM 엘리먼트에 접근할 수 있다.
+- 쿼리 함수의 사용은 특정 우선 순위를 기준으로 사용할 것을 권장하고 있다. [공식 매뉴얼](https://testing-library.com/docs/guide-which-query)에서 확인할 수 있다.
+- `querySelector`를 사용할 수도 있지만, 지양할 것을 권장하고 있다.
+
+### 이벤트 다루기
+
+```js
+it("increases", () => {
+  const utils = render(<Counter />);
+  const number = utils.getByText("0");
+  const plusButton = utils.getByText("+1");
+  fireEvent.click(plusButton);
+  fireEvent.click(plusButton);
+  expect(number).toHaveTextContent("2");
+  expect(number.textContent).toBe("2");
+});
+```
+
+- fireEvent 함수로 이벤트를 발생시킬 수 있다.
+- 위 예제에서는 jest-dom의 확장 matcher 사용해서 비교하는 방법과 textContent를 직접 비교 방법을 둘 다 사용
