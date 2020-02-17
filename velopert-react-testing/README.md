@@ -172,3 +172,17 @@ it("increases", () => {
 ## 7. react-testing-library 를 사용하여 TDD 개발 흐름으로 투두리스트 만들기
 
 > 코드 : [/velopert-react-testing/react-testing-7](/velopert-react-testing/react-testing-7)
+
+`react-testing-library`의 쿼리 함수의 활용 방법을 학습
+
+## 8. react-testing-library 의 비동기작업을 위한 테스트
+
+> 코드 : [/velopert-react-testing/react-testing-8](/velopert-react-testing/react-testing-8)
+
+- [Async Utilities](https://testing-library.com/docs/dom-testing-library/api-async) 사용
+- `Async Utilities`의 `wait`, `waitForElement`, `waitForDomChange`, `waitForElementToBeRemoved` 함수의 스펙과 사용 예를 학습
+
+### REST API 호출하는 경우의 테스트
+
+- JSONPlaceholder(Fake Online REST API for Testing and Prototyping)의 사용
+- `axios-mock-adapter`의 사용
