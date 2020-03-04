@@ -9,3 +9,7 @@
 ## TypeScript
 
 - [TypeScript 공식 문서를 읽고 정리](/typescript-handbook)
+
+## General
+
+- [코딩 테스트 문제풀이](/coding-test)
