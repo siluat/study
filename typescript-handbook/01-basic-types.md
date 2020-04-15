@@ -1,5 +1,7 @@
 ## Basic Types
 
+기본 타입
+
 ### Boolean, Number, String
 
 타입을 명시한다는 것을 제외하면 자바스크립트와 모든 특징이 동일
