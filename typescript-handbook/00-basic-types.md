@@ -75,7 +75,7 @@ notSure = "maybe a string instead";
 notSure = false;
 ```
 
-`Object`와 유사해보일 수 있다. 하지만 `Object` 타입에는 아무 값이나 대입할 수는 있지만, 대입 후 `Object` 타입에 없는 임의의 메서드를 호출할 수 없다.
+`Object`와 유사해보일 수 있다. 하지만 `Object` 타입에는 아무 값이나 대입할 수는 있지만, 대입 후 `Object` 타입에 없는 임의의 메서드를 호출할 수는 없다.
 
 ```typescript
 let notSure: any = 4;
