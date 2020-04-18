@@ -1,6 +1,6 @@
 # Redux
 
-## 기본개념
+## 기본 개념
 
 ### Action
 
@@ -116,12 +116,12 @@ Redux 공식 매뉴얼은 액션 파일, 리듀서 파일 등을 별도로 구�
 
 `connect()` 함수를 컴포넌트와 스토어를 연동할 때, 어떤 액션 함수들을 연동할지 정의한다.
 
-## 연습코드
+## 연습 코드
 
 - [Redux Counter Vanilla Example](./counter-vanilla) : 바닐라 자바스크립트로 redux 사용
 - [리덕스를 리액트와 함께 사용하기](./velopert-react-redux) : [Redux (3) 리덕스를 리액트와 함께 사용하기](https://velog.io/@velopert/Redux-3-%EB%A6%AC%EB%8D%95%EC%8A%A4%EB%A5%BC-%EB%A6%AC%EC%95%A1%ED%8A%B8%EC%99%80-%ED%95%A8%EA%BB%98-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0-nvjltahf5e) 예제 코드
 
-## 참고자료
+## 참고 자료
 
 - [Redux 또는 MobX 를 통한 상태 관리](https://velog.io/@velopert/series/redux-or-mobx)
 - [Redux Basic Tutorial](https://redux.js.org/basics/basic-tutorial)
