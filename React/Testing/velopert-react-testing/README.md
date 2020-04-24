@@ -4,7 +4,7 @@
 
 ## 2. 자바스크립트 테스팅의 기초
 
-> 코드 : [/velopert-react-testing/react-testing-2](/velopert-react-testing/react-testing-2)
+> 코드 : [./react-testing-2](./react-testing-2)
 
 - [Jest](https://jestjs.io/)를 사용
 - @types/jest를 설치하면 VS Code에서 인텔리센스 지원을 받을 수 있다.
@@ -12,11 +12,11 @@
 
 ## 3. TDD의 소개
 
-> 코드 : [/velopert-react-testing/react-testing-3](/velopert-react-testing/react-testing-3)
+> 코드 : [./react-testing-3](./react-testing-3)
 
 ## 5. Enzyme을 사용한 리액트 컴포넌트 테스트
 
-> 코드 : [/velopert-react-testing/react-testing-5](/velopert-react-testing/react-testing-5)
+> 코드 : [./react-testing-5](./react-testing-5)
 
 ### 스냅샷 테스팅
 
@@ -129,7 +129,7 @@ it("increases", () => {
 
 ## 6. react-testing-library 를 사용한 리액트 컴포넌트 테스트
 
-> 코드 : [/velopert-react-testing/react-testing-6](/velopert-react-testing/react-testing-6)
+> 코드 : [./react-testing-6](./react-testing-6)
 
 - Enzyme 과 달리 모든 테스트를 DOM 위주로 진행, 컴포넌트의 props 나 state 를 조회하는 일은 없음
 - Enzyme 은 엄청나게 다양한 기능을 제공하는 반면, react-testing-library 에는 정말 필요한 기능들만 지원을 해줘서 매우 가볍움
@@ -171,13 +171,13 @@ it("increases", () => {
 
 ## 7. react-testing-library 를 사용하여 TDD 개발 흐름으로 투두리스트 만들기
 
-> 코드 : [/velopert-react-testing/react-testing-7](/velopert-react-testing/react-testing-7)
+> 코드 : [./react-testing-7](./react-testing-7)
 
 `react-testing-library`의 쿼리 함수의 활용 방법을 학습
 
 ## 8. react-testing-library 의 비동기작업을 위한 테스트
 
-> 코드 : [/velopert-react-testing/react-testing-8](/velopert-react-testing/react-testing-8)
+> 코드 : [./react-testing-8](./react-testing-8)
 
 - [Async Utilities](https://testing-library.com/docs/dom-testing-library/api-async) 사용
 - `Async Utilities`의 `wait`, `waitForElement`, `waitForDomChange`, `waitForElementToBeRemoved` 함수의 스펙과 사용 예를 학습

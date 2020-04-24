@@ -5,3 +5,5 @@
 > 모든 내용은 TypeScript 3.7 기준이다.
 
 - [Basic Types](01-basic-types.md)
+- [Variable Declarations](02-variable-declarations.md)
+- [Interfaces](03-interfaces.md)
