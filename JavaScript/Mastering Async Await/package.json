@@ -1,0 +1,7 @@
+{
+  "name": "mastering-async-await",
+  "dependencies": {
+    "node-fetch": "^2.6.0",
+    "superagent": "^5.2.2"
+  }
+}
