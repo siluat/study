@@ -40,11 +40,20 @@ test.each`
 
 describe("given banned word", () => {
   const bannedWord = faker.lorem.word();
-  const source = "hello " + bannedWord;
-  const expected = "hello " + "*".repeat(bannedWord.length);
+  const masked = "*".repeat(bannedWord.length);
+  const source = `hello ${bannedWord}`;
+  const options = { bannedWords: [bannedWord] };
 
-  test(`${bannedWord} when invoke sut then it returns ${expected}`, () => {
-    const actual = sut(source, { bannedWords: [bannedWord] });
-    expect(actual).toBe(expected);
+  test(`"${bannedWord}" when invoke sut then it returns "hello ${masked}"`, () => {
+    const actual = sut(source, options);
+    expect(actual).toBe(`hello ${masked}`);
   });
+});
+
+test.each`
+  source            | expected
+  ${" hello world"} | ${"hello world"}
+`("sut correctly trims whitespaces", ({ source, expected }) => {
+  const actual = sut(source);
+  expect(actual).toBe(expected);
 });
