@@ -5,6 +5,20 @@ OAuth 2.0은 자신이 소유한 리소스에 소프트웨어 애플리케이션
 > [RFC 6749](https://tools.ietf.org/html/rfc6749)  
 > The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf.
 
+## OAuth의 구성 요소
+
+- 리소스 소유자
+- 보호된 리소스
+- 클라이언트
+- 인가 서버
+
+> [RFC 6749에서 정의하는 4가지 역할](https://tools.ietf.org/html/rfc6749#section-1.1)도 같이 참고하면 좋을 것 같다.
+>
+> - resource owner
+> - resource server
+> - client
+> - authorization server
+
 ## OAuth 2.0이 아닌 것
 
 OAuth는,
