@@ -3,6 +3,7 @@ import {
   Links,
   LiveReload,
   Meta,
+  Outlet,
   Scripts,
   ScrollRestoration,
 } from "remix";
@@ -23,6 +24,7 @@ export default function App() {
       </head>
       <body>
         <Link to="/posts">Posts</Link>
+        <Outlet />
         <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === "development" && <LiveReload />}
