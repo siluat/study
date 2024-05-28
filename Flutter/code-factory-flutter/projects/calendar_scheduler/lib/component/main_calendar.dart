@@ -5,11 +5,13 @@ import 'package:table_calendar/table_calendar.dart';
 class MainCalendar extends StatelessWidget {
   final OnDaySelected onDaySelected;
   final DateTime selectedDate;
+  final DateTime focusedDate;
 
   const MainCalendar({
     super.key,
     required this.onDaySelected,
     required this.selectedDate,
+    required this.focusedDate,
   });
 
   @override
@@ -21,7 +23,7 @@ class MainCalendar extends StatelessWidget {
           date.year == selectedDate.year &&
           date.month == selectedDate.month &&
           date.day == selectedDate.day,
-      focusedDay: selectedDate,
+      focusedDay: focusedDate,
       firstDay: DateTime(1800, 1, 1),
       lastDay: DateTime(3000, 1, 1),
       headerStyle: const HeaderStyle(
@@ -49,6 +51,10 @@ class MainCalendar extends StatelessWidget {
             width: 1.0,
           ),
         ),
+        outsideDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6.0),
+          color: Colors.transparent,
+        ),
         defaultTextStyle: TextStyle(
           fontWeight: FontWeight.w600,
           color: darkGreyColor,
@@ -60,6 +66,10 @@ class MainCalendar extends StatelessWidget {
         selectedTextStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           color: primaryColor,
+        ),
+        outsideTextStyle: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: darkGreyColor,
         ),
       ),
     );
