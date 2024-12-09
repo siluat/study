@@ -6,14 +6,19 @@ class ActivityWindow {
 
     private val activities: MutableList<Activity>
 
+    /**
+     * @throws IllegalStateException 활동 목록이 비어있는 경우
+     */
     val startTimestamp: LocalDateTime
         get() = activities.minByOrNull { it.timestamp }
-            ?.timestamp ?: throw IllegalStateException()
+            ?.timestamp ?: throw IllegalStateException("활동 목록이 비어있어 시작 시간을 결정할 수 없습니다")
 
+    /**
+     * @throws IllegalStateException 활동 목록이 비어있는 경우
+     */
     val endTimestamp: LocalDateTime
         get() = activities.maxByOrNull { it.timestamp }
-            ?.timestamp ?: throw IllegalStateException()
-
+            ?.timestamp ?: throw IllegalStateException("활동 목록이 비어있어 종료 시간을 결정할 수 없습니다")
     fun calculateBalance(accountId: Account.AccountId): Money {
         val depositBalance = activities
             .filter { it.targetAccountId == accountId }
