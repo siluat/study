@@ -1,0 +1,6 @@
+Flutter/**/android/** linguist-vendored
+Flutter/**/ios/** linguist-vendored
+Flutter/**/linux/** linguist-vendored
+Flutter/**/macos/** linguist-vendored
+Flutter/**/web/** linguist-vendored
+Flutter/**/windows/** linguist-vendored
