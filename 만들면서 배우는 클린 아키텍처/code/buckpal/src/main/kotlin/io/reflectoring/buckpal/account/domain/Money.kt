@@ -2,7 +2,7 @@ package io.reflectoring.buckpal.account.domain
 
 import java.math.BigInteger
 
-data class Money(private val amount: BigInteger) {
+data class Money(val amount: BigInteger) {
 
     companion object {
         val ZERO: Money = Money(BigInteger.ZERO)
