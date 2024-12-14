@@ -6,6 +6,7 @@ import io.reflectoring.buckpal.account.application.port.out.AccountLock
 import io.reflectoring.buckpal.account.application.port.out.LoadAccountPort
 import io.reflectoring.buckpal.account.application.port.out.UpdateAccountStatePort
 import io.reflectoring.buckpal.common.UseCase
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
@@ -18,13 +19,13 @@ class SendMoneyService(
     /**
      * 계좌를 불러오기 위해 아웃고잉 포트 인터페이스인 LoadAccountPort를 사용한다
      */
-    val loadAccountPort: LoadAccountPort,
-    val accountLock: AccountLock,
+    @Autowired(required = false) val loadAccountPort: LoadAccountPort,
+    @Autowired(required = false) val accountLock: AccountLock,
     /**
      * 데이터베이스의 계좌 상태를 업데이트하기 위해
      * 아웃고잉 포트 인터페이스인 UpdateAccountStatePort를 사용한다
      */
-    val updateAccountStatePort: UpdateAccountStatePort,
+    @Autowired(required = false) val updateAccountStatePort: UpdateAccountStatePort,
     val moneyTransferProperties: MoneyTransferProperties
 ) : SendMoneyUseCase {
 
