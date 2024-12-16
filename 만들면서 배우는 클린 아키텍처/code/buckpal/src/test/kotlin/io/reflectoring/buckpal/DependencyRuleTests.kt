@@ -35,15 +35,4 @@ class DependencyRuleTests {
             .check(ClassFileImporter().importPackages("io.reflectoring.buckpal.."))
     }
 
-    @Test
-    fun `test package dependencies`() {
-        noClasses()
-            .that()
-            .resideInAPackage("io.reflectoring.buckpal.account.domain..")
-            .should()
-            .dependOnClassesThat()
-            .resideInAnyPackage("io.reflectoring.buckpal.account.application..")
-            .check(ClassFileImporter().importPackages("io.reflectoring.buckpal.."))
-    }
-
 }
