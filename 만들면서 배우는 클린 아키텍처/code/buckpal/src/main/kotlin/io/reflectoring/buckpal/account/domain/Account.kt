@@ -39,7 +39,7 @@ data class Account(
     }
 
     private fun mayWithdraw(money: Money): Boolean =
-        (calculateBalance() + money.negate()).isPositive()
+        (calculateBalance() + money.negate()).isPositiveOrZero()
 
     fun deposit(money: Money, sourceAccountId: AccountId): Boolean {
         requireNotNull(id) { "Account ID must not be null" }
