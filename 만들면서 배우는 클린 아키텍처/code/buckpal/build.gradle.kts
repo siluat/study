@@ -27,6 +27,7 @@ dependencies {
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testImplementation("io.mockk:mockk:1.13.13")
+	testImplementation("com.tngtech.archunit:archunit-junit5:1.1.0")
 	runtimeOnly("com.h2database:h2")
 }
 
