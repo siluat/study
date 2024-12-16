@@ -10,12 +10,12 @@ class Adapters(
     private val incomingAdapterPackages = mutableListOf<String>()
     private val outgoingAdapterPackages = mutableListOf<String>()
 
-    fun outgoing(packageName: String): Adapters {
+    fun incoming(packageName: String): Adapters {
         incomingAdapterPackages.add(fullQualifiedPackage(packageName))
         return this
     }
 
-    fun incoming(packageName: String): Adapters {
+    fun outgoing(packageName: String): Adapters {
         outgoingAdapterPackages.add(fullQualifiedPackage(packageName))
         return this
     }
