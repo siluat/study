@@ -22,7 +22,7 @@
 - [ ] 14. More about Cargo and Crates.io
 - [ ] 15. Smart Pointers
 - [ ] 16. Fearless Concurrency
-- [ ] 17. Fundanmentals of Asynchronous Programming: Async, Await, Futures, and Streams
+- [ ] 17. Fundamentals of Asynchronous Programming: Async, Await, Futures, and Streams
 - [ ] 18. Object Oriented Programming Features of Rust
 - [ ] 19. Patterns and Matching
 - [ ] 20. Advanced Features

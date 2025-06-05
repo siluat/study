@@ -12,6 +12,18 @@
 - `cargo fmt`: 코드 포맷팅
 - `cargo clippy`: 린트 도구
 
+## crate
+
+- Rust의 패키지 단위
+  - Binary crate: 실행 가능한 프로그램
+  - Library crate: 다른 라이브러리에서 사용할 수 있는 라이브러리
+- [crates.io: The Rust community’s crate registry](https://crates.io/)
+
+## prelude
+
+- 모든 Rust 프로그램에 자동으로 import되는 표준 라이브러리
+- [문서](https://doc.rust-lang.org/std/prelude/index.html)
+
 ## rustc
 
 - Rust의 공식 컴파일러
