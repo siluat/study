@@ -63,3 +63,40 @@ fn plus_one(x: i32) -> i32 {
     x + 1
 }
 ```
+
+### Control Flow
+
+```rust
+// Using if in a let statement
+let n = if condition { 5 } else { 6 };
+
+// loop
+let result = loop {
+    // 'continue', 'break' and 'return' keywords are available
+    // 'break' returns the value from the loop
+}
+
+// loop label
+'loop_name: loop {
+    loop {
+        break; // break current loop
+        break 'loop_name; // break outer loop
+    }
+}
+
+// white
+while condition {
+    // ...
+}
+
+// for loop with an array
+let a = [10, 20, 30, 40, 50];
+for element in a {
+    // ...
+}
+
+// for loop with a range
+for number in 1..4 {
+    // ...
+}
+```
