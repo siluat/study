@@ -55,3 +55,11 @@ let a = [1, 2, 3, 4, 5];
 let first = a[0];
 let second = a[1];
 ```
+
+### Function
+
+```rust
+fn plus_one(x: i32) -> i32 {
+    x + 1
+}
+```
