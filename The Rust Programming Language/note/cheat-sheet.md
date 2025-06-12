@@ -1,20 +1,32 @@
 # My cheat sheet for Rust
 
-## Variables
+## Cargo
+
+```shell
+# create new project
+cargo new {project_name}
+
+# Run the project
+cargo run
+```
+
+## Syntax
+
+### Variables
 
 ```rust
 let x = 5;  // variables are immutable by default
 let mut y = 5;  // mutable variables are declared with `mut`
 ```
 
-## Constants
+### Constants
 
 ```rust
 const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
 // MUST be annotated with a type, SHOULD be in SCREAMING_SNAKE_CASE
 ```
 
-## Data Types
+### Data Types
 
 ```rust
 // Integer Types, i32 is the default integer type
