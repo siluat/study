@@ -100,3 +100,82 @@ for number in 1..4 {
     // ...
 }
 ```
+
+### Struct
+
+```rust
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+```
+
+### Struct update syntax
+
+```rust
+let user2 = User {
+    email: String::from("another@example.com"),
+    ..user1
+}
+```
+
+### Tuple Struct
+
+```rust
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+let black = Color(0, 0, 0);
+let origin = Point(0, 0, 0);
+```
+
+### Unit-Like Struct
+
+```rust
+struct AlwaysEqual;
+```
+
+### Derive Debug
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+```
+
+### Debug Print
+
+```rust
+println!("{:#?}", rect1);
+```
+
+### Debug Print with dbg!
+
+```rust
+let scale = 2;
+let rect1 = Rectangle {
+    width: dbg!(30 * scale),
+    height: 50,
+};
+
+dbg!(&rect1);
+```
+
+### Associated Functions
+
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn square(size: u32) -> Self {
+}
+
+let sq = Rectangle::square(3);
+```

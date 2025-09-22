@@ -76,3 +76,38 @@
 - 어떤 값에 대한 불편 참조자가 있는 동안 같은 값의 가변 참조자를 만드는 것도 불가능하다.
 
 - 슬라이스(slice)를 사용하여 컬렉션의 연속된 일련의 요소를 참조할 수 있다. 참조자의 일종으로 소유권을 갖지 않는다.
+
+# Method
+
+- 함수와 유사하지만,
+  - 구조체 컨텍스트와 정의되고 열거형이나 트레이트 객체 안에 정의되기도 한다.
+  - 첫 번째 매개변수가 항상 `self`다.
+
+# Automatic referencing and dereferencing
+
+- 객체의 메서드를 호출하면 러스트에서 자동으로 해당 메서드의 시그니처에 맞도록 `&`, `&mut`, `*`를 추가한다.
+- 자동 참조 동작은 메서드의 수신자(`self`의 타입)가 명확하기 때문에 가능하다.
+- 메서드의 수신자를 러스트에서 암묵적으로 빌린다는 점은 실제로 소유권을 인체공학적으로 만드는 중요한 부분이다.
+
+# Associated Functions
+
+- `impl` 블록 내에 정의하지만 `self`를 첫 매개변수로 갖지 않는 함수다.
+- 연관 함수는 구주체의 새 인스턴스를 반환하는 생성자로 자주 활용된다.
+
+# `impl` Block
+
+- 각 구조체는 여러 개의 `impl` 블록을 가질 수 있다.
+
+```rust
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+```
