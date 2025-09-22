@@ -18,6 +18,13 @@
   - Binary crate: 실행 가능한 프로그램
   - Library crate: 다른 라이브러리에서 사용할 수 있는 라이브러리
 - [crates.io: The Rust community’s crate registry](https://crates.io/)
+- crate root: 러스터 컴파일러가 컴파일을 시작하는 소스 파일
+
+## package
+
+- 일련의 기능을 제공하는 하나 이상의 crate로 구성된 번들
+- package에는 여러 개의 binary crate가 포함될 수 있지만, library crate는 하나만 넣을 수 있다.
+- package에는 적어도 하나 이상의 crate가 포함되어야 한다.
 
 ## ownership
 
