@@ -425,3 +425,90 @@ for b in "Зд".bytes() {
 // 208
 // 180
 ```
+
+## Error Handling
+
+### Unrecoverable Errors with `panic!`
+
+```rust
+panic!("crash and burn");
+```
+
+### Recoverable Errors with `Result<T, E>` and `match`
+
+```rust
+let greeting_file = match File::open("hello.txt") {
+    Ok(file) => file,
+    Err(error) => panic!("Problem opening the file: {:?}", error),
+};
+```
+
+### Recoverable Errors with `unwrap_or_else`
+
+```rust
+let greeting_file = File::open("hello.txt").unwrap_or_else(|error| {
+    if error.kind() == ErrorKind::NotFound {
+        File::create("hello.txt").unwrap_or_else(|error| {
+            panic!("Problem creating the file: {:?}", error);
+        })
+    } else {
+        panic!("Problem opening the file: {:?}", error);
+    }
+});
+```
+
+### Recoverable Errors with `unwrap` and `expect` Operator
+
+```rust
+let greeting_file = File::open("hello.txt").unwrap();
+```
+
+```rust
+let greeting_file = File::open("hello.txt")
+    .expect("hello.txt should be included in this project");
+```
+
+### Error Propagation
+
+```rust
+fn read_username_from_file() -> Result<String, io::Error> {
+    let username_file_result = File::open("hello.txt");
+
+    let mut username_file = match username_file_result {
+        Ok(file) => file,
+        Err(e) => return Err(e),
+    };
+
+    let mut username = String::new();
+
+    match username_file.read_to_string(&mut username) {
+        Ok(_) => Ok(username),
+        Err(e) => Err(e),
+    }
+}
+```
+
+### Error Propagation with `?` Operator
+
+```rust
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut username_file = File::open("hello.txt")?;
+    let mut username = String::new();
+    username_file.read_to_string(&mut username)?;
+    Ok(username)
+}
+```
+
+```rust
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut username = String::new();
+    File::open("hello.txt")?.read_to_string(&mut username)?;
+    Ok(username)
+}
+```
+
+```rust
+fn read_username_from_file() -> Result<String, io::Error> {
+    fs::read_to_string("hello.txt")
+}
+```
