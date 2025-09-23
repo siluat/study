@@ -145,3 +145,31 @@ enum Option<T> {
 - 이름이 같은 두개의 타입을 동일한 스코프에 가져오려면 부모 모듈을 명시해서 사용하거나 `as` 키워드를 사용해서 새 이름으로 사용할 수 있다.
 - `pub use`를 사용하여 가져온 아이템을 다른 곳에서 가져갈 수 있도록 공개할 수 있다. (re-exporting)
 - 예전 스타일의 모듈 구조에서는 ~mod.rs~ 파일에 모듈을 정의했지만, 여러 파일의 이름이 ~mod.rs~로 끝나게 되어, 에디터에서 이 파일들을 동시에 열어두었을 때 헷갈릴 수 있다는 점 때문에 ~mod.rs~가 아닌 모듈 이름과 동일하게 만들어서 사용하는 스타일이 생겼다. 러스트 컴파일러는 두 스타일을 모두 지원하지만 동시에 사용할 수는 없다.
+
+# Common Collections
+
+- A ~vector~ allows you to store a variable number of values next to each other.
+- A ~string~ is a collection of characters. We’ve mentioned the `String` type previously, but in this chapter we’ll talk about it in depth.
+- A `hash map` allows you to associate a value with a specific key. It’s a particular implementation of the more general data structure called a `map`.
+- To learn about the other kinds of collections provided by the standard library, see [the documentation](https://doc.rust-lang.org/std/collections/index.html).
+
+# String
+
+- 러스트 문자열은 숫자 인덱싱(e.g. `s[0]`)을 지원하지 않는데, 공식 문서에 의하면 이유는 다음과 같다.
+  - UTF-8 문자열의 바이트 안의 인덱스는 유효한 유니코드 스칼라 값과 항상 대응되지는 않는다. (언어마다 문자열의 바이트 수가 다르기 때문)
+  - 러스트는 문자열을 보는 세 가지 방식이 있다. 바이트, 스칼라 값, 문자소 클러스터이다. 데이터가 담고 있는 것이 무슨 언어든 상관없이 각 프로그램이 필요로 하는 통역방식을 선택할 수 있도록 한다.
+  - 일반적으로 인덱스 연산은 상수 시간(O(1))에 실행될 것으로 기대받지만, 문자열 내에 유효한 문자가 몇 개 있는지 알아내기 위해 내용물을 시작 지점부터 인덱스로 지정된 곳까지 훓어야 하기 때문에 상수 시간을 보장할 수 없다.
+- 문자열 슬라이스(e.g. `s[0..3]`)는 가능하지만, 런타임에 유효하지 않은 인덱스를 참조하지 않도록 주의해서 사용해야 한다.
+- 문자열 조각에 대한 연산을 하는 가장 좋은 방법은 `chars` 메서드나 `bytes` 메서드를 사용하는 것이다.
+  - 문자를 원하는 것이라면 `chars` 메서드를 사용한다.
+  - 바이트를 원하는 것이라면 `bytes` 메서드를 사용한다.
+
+```rust
+for c in "Зд".chars() {
+    println!("{c}");
+}
+
+for b in "Зд".bytes() {
+    println!("{b}");
+}
+```

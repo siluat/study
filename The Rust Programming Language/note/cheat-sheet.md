@@ -345,7 +345,7 @@ if let Some(max) = config_max {
     println!("The maximum is configured to be {}", max);
 }
 ```
-### Module
+## Module
 
 - Start from the crate root: When compiling a crate, the compiler first looks in the crate root file (usually src/lib.rs for a library crate or src/main.rs for a binary crate) for code to compile.
 - Declaring modules: In the crate root file, you can declare new modules; say you declare a “garden” module with `mod garden;`. The compiler will look for the module’s code in these places:
@@ -359,3 +359,69 @@ if let Some(max) = config_max {
 - Paths to code in modules: Once a module is part of your crate, you can refer to code in that module from anywhere else in that same crate, as long as the privacy rules allow, using the path to the code. For example, an `Asparagus` type in the garden vegetables module would be found at `crate::garden::vegetables::Asparagus`.
 - Private vs. public: Code within a module is private from its parent modules by default. To make a module public, declare it with `pub mod` instead of `mod`. To make items within a public module public as well, use `pub` before their declarations.
 - The `use` keyword: Within a scope, the `use` keyword creates shortcuts to items to reduce repetition of long paths. In any scope that can refer to `crate::garden::vegetables::Asparagus`, you can create a shortcut with `use crate::garden::vegetables::Asparagus;` and from then on you only need to write `Asparagus` to make use of that type in the scope.
+
+## Standard Collections
+
+- [Module collections](https://doc.rust-lang.org/std/collections/index.html)
+
+### String
+
+#### Creating a New String
+
+```rust
+let mut s1 = String::new();
+
+let s2 = "initial contents".to_string();
+
+let s3 = String::from("initial contents");
+```
+
+#### Updating a String
+
+```rust
+let mut s = String::from("foo");
+s.push_str("bar");
+```
+
+#### Concatenation with `+` Operators
+
+```rust
+let s1 = String::from("Hello, ");
+let s2 = String::from("world!");
+let s3 = s1 + &s2;  // fn add(self, s: &str) -> String {
+```
+
+#### Concatenation with `format!` Macro
+
+```rust
+let s1 = String::from("tic");
+let s2 = String::from("tac");
+let s3 = String::from("toe");
+
+let s = format!("{s1}-{s2}-{s3}");
+```
+
+#### Indexing into Strings
+
+```rust
+let s1 = String::from("hello");
+let h = s1[0];
+```
+
+#### Iterating Through Strings
+
+```rust
+for c in "Зд".chars() {
+    println!("{c}");
+}
+// З
+// д
+
+for b in "Зд".bytes() {
+    println!("{b}");
+}
+// 208
+// 151
+// 208
+// 180
+```
