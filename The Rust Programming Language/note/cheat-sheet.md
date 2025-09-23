@@ -345,6 +345,112 @@ if let Some(max) = config_max {
     println!("The maximum is configured to be {}", max);
 }
 ```
+
+### Traits
+
+#### Define
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+```
+
+#### Implement
+
+```rust
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+```
+
+#### Default Implementation
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+```
+
+#### Default Implementation with Method
+
+```rust
+pub trait Summary {
+    fn summarize_author(&self) -> String;
+
+    fn summarize(&self) -> String {
+        format!("(Read more from {}...)", self.summarize_author())
+    }
+}
+```
+
+#### Trait as Parameters
+
+```rust
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
+#### Trait Bound Syntax
+
+```rust
+pub fn notify<T: Summary>(item: &T) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
+#### `impl Trait` vs Trait Bound
+
+```rust
+pub fn notify(item1: &impl Summary, item2: &impl Summary) {}
+```
+
+```rust
+pub fn notify<T: Summary>(item1: &T, item2: &T) {}
+```
+
+#### Multiple Trait Bounds with `+` syntax
+
+```rust
+pub fn notify(item: &(impl Summary + Display)) {}
+```
+
+```rust
+pub fn notify<T: Summary + Display>(item: &T) {}
+```
+
+#### `where` Clauses
+
+```rust
+pub fn some_function<T, U>(t: &T, u: &U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+```
+
+#### Returning Types That Implement Traits
+
+```rust
+fn returns_summarizable() -> impl Summary {}
+```
+
+#### Using Trait Bounds to Conditionally Implement Methods
+
+```rust
+struct Pair<T> {}
+
+impl<T> Pair<T> {}
+
+impl<T: Display + PartialOrd> Pair<T> {}
+
+impl<T: Display> ToString for T {}
+```
+
 ## Module
 
 - Start from the crate root: When compiling a crate, the compiler first looks in the crate root file (usually src/lib.rs for a library crate or src/main.rs for a binary crate) for code to compile.
