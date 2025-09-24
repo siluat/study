@@ -17,7 +17,7 @@
 - [x] 9. Error Handling
 - [x] 10. Generic Types, Traits, and Lifetimes
 - [x] 11. Writing Automated Tests
-- [ ] 12. An I/O Project: Building a Command Line Program
+- [x] 12. An I/O Project: Building a Command Line Program
 - [ ] 13. Functional Language Features: Iterators and Closures
 - [ ] 14. More about Cargo and Crates.io
 - [ ] 15. Smart Pointers
