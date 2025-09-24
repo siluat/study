@@ -451,6 +451,14 @@ impl<T: Display + PartialOrd> Pair<T> {}
 impl<T: Display> ToString for T {}
 ```
 
+### Closure
+
+```rust
+let add_one_v2 = |x: u32| -> u32 { x + 1 };
+let add_one_v3 = |x|             { x + 1 };
+let add_one_v4 = |x|               x + 1  ;
+```
+
 ## Module
 
 - Start from the crate root: When compiling a crate, the compiler first looks in the crate root file (usually src/lib.rs for a library crate or src/main.rs for a binary crate) for code to compile.
