@@ -1,0 +1,8 @@
+{
+  "chapters": {
+    "http.md": {
+      "lab": "lab1.py",
+      "tests": "lab1-tests.md"
+    }
+  }
+}
