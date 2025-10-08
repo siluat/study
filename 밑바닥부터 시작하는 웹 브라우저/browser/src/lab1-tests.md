@@ -36,3 +36,39 @@ If you fail to provide a valid URL, it'll load the book's home page:
     Malformed URL found, falling back to the WBE home page.
       URL was: not a url
     URL(scheme=http..., host=browser.engineering,... path='/')
+
+1.5 Request and Response
+------------------------
+
+The `request` function makes HTTP requests. To test it, we use the
+`test.socket` object, which mocks the HTTP server:
+
+    >>> url = test.socket.serve("Body text")
+
+Then we request the URL and test both request and response:
+
+    >>> body = lab1.URL(url).request()
+    >>> test.socket.last_request(url)
+    b'GET /page0 HTTP/1.0\r\nHost: test\r\n\r\n'
+    >>> body
+    'Body text'
+
+With an unusual `Transfer-Encoding` the request should fail:
+    
+    >>> url = test.socket.serve("", headers={
+    ...     "Transfer-Encoding": "chunked"
+    ... })
+    >>> lab1.URL(url).request()
+    Traceback (most recent call last):
+      ...
+    AssertionError
+
+Likewise with `Content-Encoding`:
+    
+    >>> url = test.socket.serve("", headers={
+    ...     "Content-Encoding": "gzip"
+    ... })
+    >>> lab1.URL(url).request()
+    Traceback (most recent call last):
+      ...
+    AssertionError
