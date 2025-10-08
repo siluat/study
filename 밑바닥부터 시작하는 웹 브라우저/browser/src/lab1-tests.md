@@ -100,4 +100,19 @@ The `load` method loads and displays a web page:
     >>> url = test.socket.serve("Some <span>text</span> here")
     >>> lab1.load(lab1.URL(url))
     Some text here
-    
+
+1.7 Encrypted Connections
+-------------------------
+
+HTTPS scheme should now be supported:
+
+    >>> lab1.URL('https://google.com/')
+    URL(scheme=https, host=google.com, port=443, path='/')
+
+Here we're making sure that SSL support is enabled.
+
+    >>> url = 'https://test.test/example2'
+    >>> test.socket.respond(url, b"HTTP/1.0 200 OK\r\n\r\n")
+    >>> body = lab1.URL(url).request()
+    >>> body
+    ''
