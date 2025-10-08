@@ -72,3 +72,32 @@ Likewise with `Content-Encoding`:
     Traceback (most recent call last):
       ...
     AssertionError
+
+1.6 Displaying the HTML
+-----------------------
+
+The `show` function is supposed to print some HTML to the screen, but
+skip the tags inside.
+
+    >>> lab1.show('<body>hello</body>')
+    hello
+    >>> lab1.show('he<body>llo</body>')
+    hello
+    >>> lab1.show('he<body>l</body>lo')
+    hello
+    >>> lab1.show('he<body>l<div>l</div>o</body>')
+    hello
+
+Note that the tags do not have to match:
+
+    >>> lab1.show('he<body>l</div>lo')
+    hello
+    >>> lab1.show('he<body>l<div>l</body>o</div>')
+    hello
+
+The `load` method loads and displays a web page:
+
+    >>> url = test.socket.serve("Some <span>text</span> here")
+    >>> lab1.load(lab1.URL(url))
+    Some text here
+    
