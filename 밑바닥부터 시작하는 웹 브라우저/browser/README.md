@@ -17,10 +17,10 @@ make test
 ### Chapter 1 버전
 
 ```bash
-python src/lab1.py http://example.org/
-python src/lab1.py http://browser.engineering/http.html
-python src/lab1.py https://example.org/
-python src/lab1.py https://browser.engineering/http.html
+python3 src/lab1.py http://example.org/
+python3 src/lab1.py http://browser.engineering/http.html
+python3 src/lab1.py https://example.org/
+python3 src/lab1.py https://browser.engineering/http.html
 ```
 
 - 기능
