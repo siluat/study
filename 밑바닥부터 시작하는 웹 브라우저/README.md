@@ -10,7 +10,7 @@
 ## 진행 상황
 
 - [x] Chapter 1 웹페이지 다운로드
-- [ ] Chapter 2 화면에 그리기
+- [x] Chapter 2 화면에 그리기
 - [ ] Chapter 3 텍스트 포맷팅하기
 - [ ] Chapter 4 문서 트리 구축하기
 - [ ] Chapter 5 페이지 레이아웃
