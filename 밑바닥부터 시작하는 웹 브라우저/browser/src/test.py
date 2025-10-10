@@ -2,7 +2,9 @@
 This file contains unittests helpers for chapters 1-10
 """
 
+import wbetools
 import io
+import tkinter
 from unittest import mock
 
 class socket:
@@ -103,3 +105,47 @@ class ssl:
     @classmethod
     def patch(cls):
         return mock.patch("ssl.create_default_context", wraps=cls)
+
+class TkCanvas:
+    def __init__(self, *args, **kwargs):
+        self._parameters = kwargs
+
+    def winfo_reqwidth(self):
+        return self._parameters["width"]
+
+    def winfo_reqheight(self):
+        return self._parameters["height"]
+
+    def create_text(self, x, y, text, font=None, anchor=None, **kwargs):
+        if font or anchor:
+            print("create_text: x={} y={} text={} font={} anchor={}".format(
+                x, y, text, font, anchor))
+        else:
+            print("create_text: x={} y={} text={}".format(
+                x, y, text))
+
+    def pack(self):
+        pass
+
+    def delete(self, v):
+        pass
+
+original_tkinter_canvas = tkinter.Canvas
+
+def patch_canvas():
+    tkinter.Canvas = TkCanvas
+
+def unpatch_canvas():
+    tkinter.Canvas = original_tkinter_canvas   
+
+def breakpoint(name, *args):
+    args_str = (", " + ", ".join(["'{}'".format(arg) for arg in args]) if args else "")
+    print("breakpoint(name='{}'{})".format(name, args_str))
+
+builtin_breakpoint = wbetools.record
+
+def patch_breakpoint():
+    wbetools.record = breakpoint
+
+def unpatch_breakpoint():
+    wbetools.record = builtin_breakpoint
