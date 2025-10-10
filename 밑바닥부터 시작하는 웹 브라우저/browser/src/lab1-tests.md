@@ -116,3 +116,24 @@ Here we're making sure that SSL support is enabled.
     >>> body = lab1.URL(url).request()
     >>> body
     ''
+
+SSL support also means some support for ports. Explicit ports are
+allowed:
+
+    >>> lab1.URL('http://test.test:90')
+    URL(scheme=http, host=test.test, port=90, path='/')
+
+Requests can be made to those ports:
+
+    >>> url = 'https://test.test:400/example3'
+    >>> test.socket.respond(url, b"HTTP/1.0 200 OK\r\n\r\nHi")
+    >>> body = lab1.URL(url).request()
+    >>> body
+    'Hi'
+
+Requesting the wrong port is an error:
+
+    >>> lab1.URL("http://test.test:401/example3").request() #doctest: +ELLIPSIS
+    Traceback (most recent call last):
+      ...
+    AssertionError: Unknown URL http://test.test:401/example3, ...
