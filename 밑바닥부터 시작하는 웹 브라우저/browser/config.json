@@ -3,6 +3,10 @@
     "http.md": {
       "lab": "lab1.py",
       "tests": "lab1-tests.md"
+    },
+    "graphics.md": {
+      "lab": "lab2.py",
+      "tests": "lab2-tests.md"
     }
   }
 }
