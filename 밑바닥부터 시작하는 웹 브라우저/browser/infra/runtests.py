@@ -61,6 +61,7 @@ if __name__ == "__main__":
     results = {}
     failures = 0
     for chapter, metadata in data["chapters"].items():
+        if args.chapter and args.chapter != "all" and chapter != args.chapter: continue
         print(f"{t.bold(chapter)}: Running tests")
         for key, value in metadata.items():
             if key == "tests":
@@ -68,3 +69,19 @@ if __name__ == "__main__":
                 results[value] = run_tests(chapter, value)
                 if not results[value][0]: print(t.green("pass"))
         failures += sum([failures for failures, count in results.values()])
+
+    if not results:
+        if args.chapter:
+            print(f"Could not find chapter {args.chapter}")
+            print("  Extant chapters:", ", ".join(data["chapters"].keys()))
+        elif args.key:
+            print(f"Could not find key {args.key}")
+            key_sets = [set(list(metadata.keys())) for chapter, metadata in data["chapters"].items()]
+            keys = set([]).union(*key_sets) - set(["disabled"])
+            print("  Extant chapters:", ", ".join(keys))
+        sys.exit(-1)
+
+    total = sum([count for failures, count in results.values()])
+    if failures:
+        print(f"Failed {failures} of {total} tests")
+        sys.exit(failures)

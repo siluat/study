@@ -1,5 +1,4 @@
-CHAPTERS=\
-http \
+CHAPTER=all
 
 lint test:
-	python infra/runtests.py config.json --chapter $(CHAPTERS)
+	python3 infra/runtests.py config.json --chapter $(CHAPTER)
