@@ -107,6 +107,45 @@ class ssl:
     def patch(cls):
         return mock.patch("ssl.create_default_context", wraps=cls)
 
+class SilentTk:
+    def bind(self, event, callback):
+        pass
+
+tkinter.Tk = SilentTk
+
+class SilentCanvas:
+    def __init__(self, *args, **kwargs):
+        self._parameters = kwargs
+
+    def winfo_reqwidth(self):
+        return self._parameters["width"]
+
+    def winfo_reqheight(self):
+        return self._parameters["height"]
+
+    def create_text(self, x, y, text, **kwargs):
+        pass
+
+    def create_rectangle(self, x1, y1, x2, y2, **kwargs):
+        pass
+
+    def create_line(self, x1, y1, x2, y2, **kwargs):
+        pass
+
+    def create_line(self, x1, y1, x2, y2, **kwargs):
+        pass
+
+    def create_polygon(self, *args, **kwargs):
+        pass
+
+    def pack(self):
+        pass
+
+    def delete(self, v):
+        pass
+
+tkinter.Canvas = SilentCanvas
+
 class TkCanvas:
     def __init__(self, *args, **kwargs):
         self._parameters = kwargs
