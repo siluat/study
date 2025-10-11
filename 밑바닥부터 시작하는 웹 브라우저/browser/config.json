@@ -7,6 +7,10 @@
     "graphics.md": {
       "lab": "lab2.py",
       "tests": "lab2-tests.md"
+    },
+    "text.md": {
+      "lab": "lab3.py",
+      "tests": "lab3-tests.md"
     }
   }
 }

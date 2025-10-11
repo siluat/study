@@ -5,6 +5,7 @@ This file contains unittests helpers for chapters 1-10
 import wbetools
 import io
 import tkinter
+import tkinter.font
 from unittest import mock
 
 class socket:
@@ -136,7 +137,30 @@ def patch_canvas():
     tkinter.Canvas = TkCanvas
 
 def unpatch_canvas():
-    tkinter.Canvas = original_tkinter_canvas   
+    tkinter.Canvas = original_tkinter_canvas
+
+class TkFont:
+    def __init__(self, size=12, weight='normal', slant='roman', style=None):
+        self.size = size
+        self.weight = weight
+        self.slant = slant
+        self.style = style
+
+    def measure(self, word):
+        return self.size * len(word)
+
+    def metrics(self, name=None):
+        all = {"ascent" : self.size * 0.75, "descent": self.size * 0.25,
+            "linespace": self.size}
+        if name:
+            return all[name]
+        return all
+
+    def __repr__(self):
+        return "Font size={} weight={} slant={} style={}".format(
+            self.size, self.weight, self.slant, self.style)
+
+tkinter.font.Font = TkFont
 
 def breakpoint(name, *args):
     args_str = (", " + ", ".join(["'{}'".format(arg) for arg in args]) if args else "")
