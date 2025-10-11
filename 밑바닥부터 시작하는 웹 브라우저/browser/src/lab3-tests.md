@@ -249,3 +249,20 @@ introduce the extra whitespace:
     >>> l.display_list #doctest: +NORMALIZE_WHITESPACE
     [(13, 20.25, 'Para1', Font size=12 weight=normal slant=roman style=None),
      (85, 20.25, 'Para2', Font size=12 weight=normal slant=roman style=None)]
+
+3.7 Font Caching
+----------------
+
+To test font caching, we call `get_font` twice and use Python's `is`
+operator to test that we get identical `Font` objects back:
+
+    >>> a = lab3.get_font(16, "normal", "roman")
+    >>> b = lab3.get_font(16, "normal", "roman")
+    >>> c = lab3.get_font(20, "normal", "roman")
+    >>> d = lab3.get_font(16, "bold", "roman")
+    >>> a is b
+    True
+    >>> a is c
+    False
+    >>> a is d
+    False

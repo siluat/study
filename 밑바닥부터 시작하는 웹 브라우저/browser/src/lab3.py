@@ -37,6 +37,16 @@ def lex(body):
         out.append(Text(buffer))
     return out
 
+FONTS = {}
+
+def get_font(size, weight, style):
+    key = (size, weight, style)
+    if key not in FONTS:
+        font = tkinter.font.Font(size=size, weight=weight, slant=style)
+        label = tkinter.Label(font=font)
+        FONTS[key] = (font, label)
+    return FONTS[key][0]
+
 class Layout:
     def __init__(self, tokens):
         self.display_list = []
@@ -79,11 +89,7 @@ class Layout:
             self.cursor_y += VSTEP
 
     def word(self, word):
-        font = tkinter.font.Font(
-            size=self.size,
-            weight=self.weight,
-            slant=self.style,
-        )
+        font = get_font(self.size, self.weight, self.style)
         w = font.measure(word)
         if self.cursor_x + w > WIDTH - HSTEP:
             self.flush()
