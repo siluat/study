@@ -12,7 +12,7 @@
 - [x] Chapter 1 웹페이지 다운로드
 - [x] Chapter 2 화면에 그리기
 - [x] Chapter 3 텍스트 포맷팅하기
-- [ ] Chapter 4 문서 트리 구축하기
+- [x] Chapter 4 문서 트리 구축하기
 - [ ] Chapter 5 페이지 레이아웃
 - [ ] Chapter 6 개발자 스타일 적용하기
 - [ ] Chapter 7 버튼과 링크 처리하기
