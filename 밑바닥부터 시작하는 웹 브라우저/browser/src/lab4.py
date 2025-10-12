@@ -1,3 +1,9 @@
+import wbetools
+import tkinter
+from lab1 import URL
+from lab2 import WIDTH, HSTEP, VSTEP
+from lab3 import get_font, Layout, Browser
+
 class Text:
     def __init__(self, text, parent):
         self.text = text
@@ -98,3 +104,66 @@ class HTMLParser:
             parent = self.unfinished[-1]
             parent.children.append(node)
         return self.unfinished.pop()
+
+@wbetools.patch(Layout)
+class Layout:
+    def __init__(self, tree):
+        self.display_list = []
+
+        self.cursor_x = HSTEP
+        self.cursor_y = VSTEP
+        self.weight = "normal"
+        self.style= "roman"
+        self.size = 12
+        
+        self.line = []
+        self.recurse(tree)
+        self.flush()
+
+    def recurse(self, tree):
+        if isinstance(tree, Text):
+            for word in tree.text.split():
+                self.word(word)
+        else:
+            self.open_tag(tree.tag)
+            for child in tree.children:
+                self.recurse(child)
+            self.close_tag(tree.tag)
+
+    def open_tag(self, tag):
+        if tag == "i":
+            self.style = "italic"
+        elif tag == "b":
+            self.weight = "bold"
+        elif tag == "small":
+            self.size -= 2
+        elif tag == "big":
+            self.size += 4
+        elif tag == "br":
+            self.flush()
+
+    def close_tag(self, tag):
+        if tag == "i":
+            self.style = "roman"
+        elif tag == "b":
+            self.weight = "normal"
+        elif tag == "small":
+            self.size += 2
+        elif tag == "big":
+            self.size -= 4
+        elif tag == "p":
+            self.flush()
+            self.cursor_y += VSTEP
+
+@wbetools.patch(Browser)
+class Browser:
+    def load(self, url):
+        body = url.request()
+        self.nodes = HTMLParser(body).parse()
+        self.display_list = Layout(self.nodes).display_list
+        self.draw()
+
+if __name__ == "__main__":
+    import sys
+    Browser().load(URL(sys.argv[1]))
+    tkinter.mainloop()

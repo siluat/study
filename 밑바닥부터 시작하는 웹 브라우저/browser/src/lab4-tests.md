@@ -123,3 +123,23 @@ Tag and attribute names are lower-cased:
      <html>
        <body>
          <a href="my-url" attr="my-attr">
+
+4.5 Using the Node Tree
+-----------------------
+
+First, let's test that basic layout works as expected:
+
+	>>> parser = lab4.HTMLParser("<p>text</p>")
+	>>> tree = parser.parse()
+    >>> lo = lab4.Layout(tree)
+    >>> lo.display_list
+    [(13, 20.25, 'text', Font size=12 weight=normal slant=roman style=None)]
+
+Moreover, layout should work even if we don't use the
+explicitly-supported tags like `p`:
+
+	>>> parser = lab4.HTMLParser("<div>text</div>")
+	>>> tree = parser.parse()
+    >>> lo = lab4.Layout(tree)
+    >>> lo.display_list
+    [(13, 20.25, 'text', Font size=12 weight=normal slant=roman style=None)]

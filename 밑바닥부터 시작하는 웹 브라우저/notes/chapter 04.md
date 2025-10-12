@@ -54,3 +54,6 @@ SGML에서는 문서 유형(doctype)을 선언할 때 유효한 태그를 정의
 - attribute 처리
   - HTML 태그의 attribute를 처리하는 메서드를 추가한다.
   - Element 클래스에 attributes 필드를 추가한다.
+- 문서 트리 적용
+  - 기존 Layout 클래스가 토큰이 아닌 문서 트리의 태그를 통해 텍스트의 스타일과 크기를 처리하도록 변경한다.
+  - Browser 클래스가 HTMLParser를 사용해 문서 트리를 생성하고 Layout 클래스에게 전달하도록 변경한다.
