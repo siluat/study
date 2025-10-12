@@ -71,3 +71,12 @@ We can now print the HTML tree:
          <b>
            'Test'
          ' test'
+
+Whitespace nodes are also skipped:
+
+	>>> parser = lab4.HTMLParser("<!doctype html> <html> <body> <b>test</b> </body> </html>")
+    >>> lab4.print_tree(parser.parse())
+     <html>
+       <body>
+         <b>
+           'test'

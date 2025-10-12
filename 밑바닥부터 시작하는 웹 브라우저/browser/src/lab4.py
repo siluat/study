@@ -45,6 +45,7 @@ class HTMLParser:
         return self.finish()
 
     def add_text(self, text):
+        if text.isspace(): return
         parent = self.unfinished[-1]
         node = Text(text, parent)
         parent.children.append(node)
