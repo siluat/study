@@ -50,6 +50,7 @@ class HTMLParser:
         parent.children.append(node)
 
     def add_tag(self, tag):
+        if tag.startswith("!"): return
         if tag.startswith("/"):
             if len(self.unfinished) == 1: return
             node = self.unfinished.pop()
