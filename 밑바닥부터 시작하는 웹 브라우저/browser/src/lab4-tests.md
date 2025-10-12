@@ -80,3 +80,28 @@ Whitespace nodes are also skipped:
        <body>
          <b>
            'test'
+
+4.4 Self-closing Tags
+---------------------
+
+Self-closing tags should self-close:
+
+	>>> parser = lab4.HTMLParser("<html><head><meta><link><base></head></html>")
+    >>> lab4.print_tree(parser.parse())
+     <html>
+       <head>
+         <meta>
+         <link>
+         <base>
+
+	>>> parser = lab4.HTMLParser("<html><body>a<br>b<br>c<br>d</html>")
+    >>> lab4.print_tree(parser.parse())
+     <html>
+       <body>
+         'a'
+         <br>
+         'b'
+         <br>
+         'c'
+         <br>
+         'd'

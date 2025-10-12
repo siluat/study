@@ -50,12 +50,21 @@ class HTMLParser:
         node = Text(text, parent)
         parent.children.append(node)
 
+    SELF_CLOSING_TAGS = [
+        "area", "base", "br", "col", "embed", "hr", "img", "input",
+        "link", "meta", "param", "source", "track", "wbr"
+    ]
+
     def add_tag(self, tag):
         if tag.startswith("!"): return
         if tag.startswith("/"):
             if len(self.unfinished) == 1: return
             node = self.unfinished.pop()
             parent = self.unfinished[-1]
+            parent.children.append(node)
+        elif tag in self.SELF_CLOSING_TAGS:
+            parent = self.unfinished[-1]
+            node = Element(tag, parent)
             parent.children.append(node)
         else:
             parent = self.unfinished[-1] if self.unfinished else None
