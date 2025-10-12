@@ -108,7 +108,7 @@ Self-closing tags should self-close:
 
 Attributes can be set on tags:
 
-	>>> parser = lab4.HTMLParser("<html><body><div name1=value1 name2=value2>text</div></body></html>")
+	>>> parser = lab4.HTMLParser("<div name1=value1 name2=value2>text</div>")
 	>>> lab4.print_tree(parser.parse())
 	 <html>
 	   <body>
@@ -117,7 +117,7 @@ Attributes can be set on tags:
 
 Tag and attribute names are lower-cased:
 
-    >>> parser = lab4.HTMLParser('<html><body><A HREF=my-url attr=my-attr></body></html>')
+    >>> parser = lab4.HTMLParser('<A HREF=my-url attr=my-attr>')
     >>> document = parser.parse()
     >>> lab4.print_tree(document)
      <html>
@@ -143,3 +143,42 @@ explicitly-supported tags like `p`:
     >>> lo = lab4.Layout(tree)
     >>> lo.display_list
     [(13, 20.25, 'text', Font size=12 weight=normal slant=roman style=None)]
+
+4.6 Handling Author Errors
+--------------------------
+
+Missing tags are added in:
+
+	>>> parser = lab4.HTMLParser("test")
+	>>> lab4.print_tree(parser.parse())
+	 <html>
+	   <body>
+	     'test'
+
+	>>> parser = lab4.HTMLParser("<body>test")
+	>>> lab4.print_tree(parser.parse())
+	 <html>
+	   <body>
+	     'test'
+
+Head tags are put in the head, and other tags, such as `div`, are put
+in the body. Also, tags such as `base` are self-closing:
+
+	>>> parser = lab4.HTMLParser("<base><basefont></basefont><title></title><div></div>")
+	>>> lab4.print_tree(parser.parse())
+	 <html>
+	   <head>
+	     <base>
+	     <basefont>
+	     <title>
+ 	   <body>
+ 	     <div>
+
+Missing end tags are added:
+
+	>>> parser = lab4.HTMLParser("<div>text")
+	>>> lab4.print_tree(parser.parse())
+	 <html>
+	   <body>
+	     <div>
+	       'text'
