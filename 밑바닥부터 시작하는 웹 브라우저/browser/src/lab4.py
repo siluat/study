@@ -8,13 +8,18 @@ class Text:
         return repr(self.text)
 
 class Element:
-    def __init__(self, tag, parent):
+    def __init__(self, tag, attributes, parent):
         self.tag = tag
+        self.attributes = attributes
         self.children = []
         self.parent = parent
 
     def __repr__(self):
-        return "<" + self.tag + ">"
+        attrs = [" " + k + "=\"" + v + "\"" for k, v in self.attributes.items()]
+        attr_str = ""
+        for attr in attrs:
+            attr_str += attr
+        return "<" + self.tag + attr_str + ">"
 
 def print_tree(node, indent=0):
     print(" " * indent, node)
@@ -44,6 +49,20 @@ class HTMLParser:
             self.add_text(text)
         return self.finish()
 
+    def get_attributes(self, text):
+        parts = text.split()
+        tag = parts[0].casefold()
+        attributes = {}
+        for attrpair in parts[1:]:
+            if "=" in attrpair:
+                key, value = attrpair.split("=", 1)
+                if len(value) > 2 and value[0] in ["'", "\""]:
+                    value = value[1:-1]
+                attributes[key.casefold()] = value
+            else:
+                attributes[attrpair.casefold()] = ""
+        return tag, attributes
+
     def add_text(self, text):
         if text.isspace(): return
         parent = self.unfinished[-1]
@@ -56,7 +75,9 @@ class HTMLParser:
     ]
 
     def add_tag(self, tag):
+        tag, attributes = self.get_attributes(tag)
         if tag.startswith("!"): return
+
         if tag.startswith("/"):
             if len(self.unfinished) == 1: return
             node = self.unfinished.pop()
@@ -64,11 +85,11 @@ class HTMLParser:
             parent.children.append(node)
         elif tag in self.SELF_CLOSING_TAGS:
             parent = self.unfinished[-1]
-            node = Element(tag, parent)
+            node = Element(tag, attributes, parent)
             parent.children.append(node)
         else:
             parent = self.unfinished[-1] if self.unfinished else None
-            node = Element(tag, parent)
+            node = Element(tag, attributes, parent)
             self.unfinished.append(node)
 
     def finish(self):
