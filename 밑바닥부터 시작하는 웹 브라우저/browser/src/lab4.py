@@ -4,11 +4,22 @@ class Text:
         self.children = []
         self.parent = parent
 
+    def __repr__(self):
+        return repr(self.text)
+
 class Element:
     def __init__(self, tag, parent):
         self.tag = tag
         self.children = []
         self.parent = parent
+
+    def __repr__(self):
+        return "<" + self.tag + ">"
+
+def print_tree(node, indent=0):
+    print(" " * indent, node)
+    for child in node.children:
+        print_tree(child, indent + 2)        
 
 class HTMLParser:
     def __init__(self, body):

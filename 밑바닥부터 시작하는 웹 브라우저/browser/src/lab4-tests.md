@@ -56,3 +56,18 @@ Various mixes of open and close tags work:
     'b'
     >>> root.children[1].children[2].text
     ' test'
+
+4.3 Debugging a Parser
+----------------------
+
+We can now print the HTML tree:
+
+	>>> parser = lab4.HTMLParser("<html><head></head><body>test <b>Test</b> test</body></html>")
+    >>> lab4.print_tree(parser.parse())
+     <html>
+       <head>
+       <body>
+         'test '
+         <b>
+           'Test'
+         ' test'
