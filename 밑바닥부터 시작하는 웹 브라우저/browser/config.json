@@ -11,6 +11,10 @@
     "text.md": {
       "lab": "lab3.py",
       "tests": "lab3-tests.md"
+    },
+    "html.md": {
+      "lab": "lab4.py",
+      "tests": "lab4-tests.md"
     }
   }
 }
