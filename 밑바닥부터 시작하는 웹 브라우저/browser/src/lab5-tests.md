@@ -179,3 +179,23 @@ The first display list entry is now a gray rect, since it's for a `<pre>` elemen
 
     >>> browser.display_list[0]
     DrawRect(top=18 left=13 bottom=33.0 right=787 color=gray)
+
+
+Let's also test that we can't scroll past the bottom of the page now.
+Let's make a really tall page and scroll to the bottom:
+
+    >>> tall_url = test.socket.serve("a<br>" * 100)
+    >>> browser.load(lab5.URL(tall_url))
+    >>> browser.document.height
+    1500.0
+    >>> browser.scrolldown(None)
+    >>> browser.scroll
+    100
+    >>> for i in range(100): browser.scrolldown(None)
+    >>> browser.scroll
+    936.0
+    >>> browser.scrolldown(None)
+    >>> browser.scroll
+    936.0
+
+Any further scroll-down events leave the scroll offset unchanged.

@@ -127,6 +127,7 @@ class DocumentLayout:
         self.x = HSTEP
         self.y = VSTEP
         child.layout()
+        self.height = child.height
 
     def paint(self):
         return []
@@ -195,6 +196,11 @@ class Browser:
             if cmd.top > self.scroll + HEIGHT: continue
             if cmd.bottom < self.scroll: continue
             cmd.execute(self.scroll, self.canvas)
+
+    def scrolldown(self, e):
+        max_y = max(self.document.height + 2*VSTEP - HEIGHT, 0)
+        self.scroll = min(self.scroll + SCROLL_STEP, max_y)
+        self.draw()
 
 if __name__ == "__main__":
     import sys
