@@ -130,6 +130,7 @@ class Browser:
 
         self.scroll = 0
         self.window.bind("<Down>", self.scrolldown)
+        self.window.bind("<Up>", self.scrollup)
         self.display_list = []
 
     def load(self, url):

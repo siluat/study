@@ -47,6 +47,7 @@ class Browser:
 
         self.scroll = 0
         self.window.bind("<Down>", self.scrolldown)
+        self.window.bind("<Up>", self.scrollup)
 
     def load(self, url):
         body = url.request()
@@ -64,6 +65,10 @@ class Browser:
 
     def scrolldown(self, e):
         self.scroll += SCROLL_STEP
+        self.draw()
+
+    def scrollup(self, e):
+        self.scroll = max(0, self.scroll - SCROLL_STEP)
         self.draw()
 
 if __name__ == "__main__":
