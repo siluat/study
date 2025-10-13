@@ -109,3 +109,36 @@ Let's load it and make sure we a recursive structure of layout objects:
 
 We'll test the exact shape of the tree in a second when we test size
 and position.
+
+5.3 Size and Position
+---------------------
+
+At this point you have to add `__repr__` functions to your layout
+objects. These `__repr__` functions print the sizes and positions.
+
+Let's test line breaking:
+
+    >>> lines_url = test.socket.serve("""
+    ... this is a page with a lot of long text and this test will test
+    ... whether that long text will line break correctly and create a
+    ... BlockLayout with a height of more than one line""")
+    >>> browser.load(lab5.URL(lines_url))
+    >>> lab5.print_tree(browser.document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=45.0, node=<html>)
+         BlockLayout[inline](x=13, y=18, width=774, height=45.0, node=<body>)
+
+Let's test the page above:
+
+    >>> browser.load(url)
+    >>> lab5.print_tree(browser.document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=45.0, node=<html>)
+         BlockLayout[block](x=13, y=18, width=774, height=45.0, node=<body>)
+           BlockLayout[block](x=13, y=18, width=774, height=0, node=<div>)
+           BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<div>)
+           BlockLayout[block](x=13, y=33.0, width=774, height=15.0, node=<div>)
+             BlockLayout[block](x=13, y=33.0, width=774, height=0, node=<div>)
+             BlockLayout[inline](x=13, y=33.0, width=774, height=15.0, node='text')
+           BlockLayout[block](x=13, y=48.0, width=774, height=0, node=<span>)
+           BlockLayout[inline](x=13, y=48.0, width=774, height=15.0, node=<span>)

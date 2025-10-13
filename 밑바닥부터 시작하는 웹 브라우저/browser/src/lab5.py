@@ -1,6 +1,7 @@
 import wbetools
 from lab1 import URL
-from lab2 import HSTEP, VSTEP
+from lab2 import WIDTH, HSTEP, VSTEP
+from lab3 import get_font
 from lab4 import Text, Element, print_tree, HTMLParser, Layout, Browser
 
 BLOCK_ELEMENTS = [
@@ -19,9 +20,22 @@ class BlockLayout:
         self.parent = parent
         self.previous = previous
         self.children = []
+        self.x = None
+        self.y = None
+        self.width = None
+        self.height = None
         self.display_list = []
 
     def layout(self):
+
+        self.x = self.parent.x
+        self.width = self.parent.width
+
+        if self.previous:
+            self.y = self.previous.y + self.previous.height
+        else:
+            self.y = self.parent.y
+        
         mode = self.layout_mode()
         if mode == "block":
             previous = None
@@ -43,6 +57,12 @@ class BlockLayout:
         for child in self.children:
             child.layout()
 
+        if mode == "block":
+            self.height = sum([
+                child.height for child in self.children])
+        else:
+            self.height = self.cursor_y
+
     def layout_mode(self):
         if isinstance(self.node, Text):
             return "inline"
@@ -55,6 +75,32 @@ class BlockLayout:
         else:
             return "block"
 
+    def word(self, word):
+        font = get_font(self.size, self.weight, self.style)
+        w = font.measure(word)
+        if self.cursor_x + w > self.width:
+            self.flush()
+        self.line.append((self.cursor_x, word, font))
+        self.cursor_x += w + font.measure(" ")
+
+    def flush(self):
+        if not self.line: return
+        metrics = [font.metrics() for x, word, font in self.line]
+        max_ascent = max([metric["ascent"] for metric in metrics])
+        baseline = self.cursor_y + 1.25 * max_ascent
+        for rel_x, word, font in self.line:
+            x = self.x + rel_x
+            y = self.y + baseline - font.metrics("ascent")
+            self.display_list.append((x, y, word, font))
+        max_descent = max([metric["descent"] for metric in metrics])
+        self.cursor_y = baseline + 1.25 * max_descent
+        self.cursor_x = 0
+        self.line = []
+
+    def __repr__(self):
+        return "BlockLayout[{}](x={}, y={}, width={}, height={}, node={})".format(
+            self.layout_mode(), self.x, self.y, self.width, self.height, self.node)
+
 class DocumentLayout:
     def __init__(self, node):
         self.node = node
@@ -64,7 +110,13 @@ class DocumentLayout:
     def layout(self):
         child = BlockLayout(self.node, self, None)
         self.children.append(child)
+        self.width = WIDTH - 2*HSTEP
+        self.x = HSTEP
+        self.y = VSTEP
         child.layout()
+
+    def __repr__(self):
+        return "DocumentLayout()"
 
 @wbetools.patch(Browser)
 class Browser:
