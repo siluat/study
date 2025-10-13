@@ -142,3 +142,14 @@ Let's test the page above:
              BlockLayout[inline](x=13, y=33.0, width=774, height=15.0, node='text')
            BlockLayout[block](x=13, y=48.0, width=774, height=0, node=<span>)
            BlockLayout[inline](x=13, y=48.0, width=774, height=15.0, node=<span>)
+
+5.4 Recursive Painting
+----------------------
+
+Now let's make sure we can recursively paint the whole document above:
+
+    >>> len(browser.display_list)
+    3
+
+Let's not test the actual contents, yet, because the contents of the
+display list is about to change.

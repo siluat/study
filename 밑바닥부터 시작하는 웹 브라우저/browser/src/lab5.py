@@ -1,4 +1,5 @@
 import wbetools
+import tkinter
 from lab1 import URL
 from lab2 import WIDTH, HSTEP, VSTEP
 from lab3 import get_font
@@ -97,6 +98,9 @@ class BlockLayout:
         self.cursor_x = 0
         self.line = []
 
+    def paint(self):
+        return self.display_list
+
     def __repr__(self):
         return "BlockLayout[{}](x={}, y={}, width={}, height={}, node={})".format(
             self.layout_mode(), self.x, self.y, self.width, self.height, self.node)
@@ -115,8 +119,17 @@ class DocumentLayout:
         self.y = VSTEP
         child.layout()
 
+    def paint(self):
+        return []
+
     def __repr__(self):
         return "DocumentLayout()"
+
+def paint_tree(layout_object, display_list):
+    display_list.extend(layout_object.paint())
+
+    for child in layout_object.children:
+        paint_tree(child, display_list)        
 
 @wbetools.patch(Browser)
 class Browser:
@@ -125,4 +138,11 @@ class Browser:
         self.nodes = HTMLParser(body).parse()
         self.document = DocumentLayout(self.nodes)
         self.document.layout()
+        self.display_list = []
+        paint_tree(self.document, self.display_list)
         self.draw()
+
+if __name__ == "__main__":
+    import sys
+    Browser().load(URL(sys.argv[1]))
+    tkinter.mainloop()
