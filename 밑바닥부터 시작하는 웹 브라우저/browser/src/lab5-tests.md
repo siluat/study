@@ -153,3 +153,29 @@ Now let's make sure we can recursively paint the whole document above:
 
 Let's not test the actual contents, yet, because the contents of the
 display list is about to change.
+
+5.5 Backgrounds
+---------------
+
+We should now have `DrawText` and `DrawRect` objects:
+
+    >>> browser.display_list #doctest: +NORMALIZE_WHITESPACE
+    [DrawText(top=20.25 left=13 bottom=32.25 text=text font=Font size=12 weight=normal slant=roman style=None),
+     DrawText(top=35.25 left=13 bottom=47.25 text=text font=Font size=12 weight=normal slant=roman style=None),
+     DrawText(top=50.25 left=13 bottom=62.25 text=text font=Font size=12 weight=normal slant=roman style=None)]
+
+A this point, `<pre>` elements should have a gray background.
+
+    >>> url = lab5.URL(test.socket.serve("<pre>pre text</pre>"))
+    >>> browser = lab5.Browser()
+    >>> browser.load(url)
+    >>> lab5.print_tree(browser.document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=15.0, node=<html>)
+         BlockLayout[block](x=13, y=18, width=774, height=15.0, node=<body>)
+           BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<pre>)
+
+The first display list entry is now a gray rect, since it's for a `<pre>` element:
+
+    >>> browser.display_list[0]
+    DrawRect(top=18 left=13 bottom=33.0 right=787 color=gray)

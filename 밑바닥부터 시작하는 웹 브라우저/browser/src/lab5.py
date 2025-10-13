@@ -1,7 +1,7 @@
 import wbetools
 import tkinter
 from lab1 import URL
-from lab2 import WIDTH, HSTEP, VSTEP
+from lab2 import WIDTH, HEIGHT, HSTEP, VSTEP, SCROLL_STEP
 from lab3 import get_font
 from lab4 import Text, Element, print_tree, HTMLParser, Layout, Browser
 
@@ -99,7 +99,16 @@ class BlockLayout:
         self.line = []
 
     def paint(self):
-        return self.display_list
+        cmds = []
+        if isinstance(self.node, Element) and self.node.tag == "pre":
+            x2, y2 = self.x + self.width, self.y + self.height
+            rect = DrawRect(self.x, self.y, x2, y2, "gray")
+            cmds.append(rect)
+
+        if self.layout_mode() == "inline":
+            for x, y, word, font in self.display_list:
+                cmds.append(DrawText(x, y, word, font))
+        return cmds
 
     def __repr__(self):
         return "BlockLayout[{}](x={}, y={}, width={}, height={}, node={})".format(
@@ -125,6 +134,44 @@ class DocumentLayout:
     def __repr__(self):
         return "DocumentLayout()"
 
+class DrawText:
+    def __init__(self, x1, y1, text, font):
+        self.top = y1
+        self.left = x1
+        self.text = text
+        self.font = font
+        self.bottom = y1 + font.metrics("linespace")
+
+    def execute(self, scroll, canvas):
+        canvas.create_text(
+            self.left, self.top - scroll,
+            text=self.text,
+            font=self.font,
+            anchor='nw')
+
+    def __repr__(self):
+        return "DrawText(top={} left={} bottom={} text={} font={})".format(
+            self.top, self.left, self.bottom, self.text, self.font)
+
+class DrawRect:
+    def __init__(self, x1, y1, x2, y2, color):
+        self.top = y1
+        self.left = x1
+        self.bottom = y2
+        self.right = x2
+        self.color = color
+
+    def execute(self, scroll, canvas):
+        canvas.create_rectangle(
+            self.left, self.top - scroll,
+            self.right, self.bottom - scroll,
+            width=0,
+            fill=self.color)
+
+    def __repr__(self):
+        return "DrawRect(top={} left={} bottom={} right={} color={})".format(
+            self.top, self.left, self.bottom, self.right, self.color)
+
 def paint_tree(layout_object, display_list):
     display_list.extend(layout_object.paint())
 
@@ -141,6 +188,13 @@ class Browser:
         self.display_list = []
         paint_tree(self.document, self.display_list)
         self.draw()
+
+    def draw(self):
+        self.canvas.delete("all")
+        for cmd in self.display_list:
+            if cmd.top > self.scroll + HEIGHT: continue
+            if cmd.bottom < self.scroll: continue
+            cmd.execute(self.scroll, self.canvas)
 
 if __name__ == "__main__":
     import sys
