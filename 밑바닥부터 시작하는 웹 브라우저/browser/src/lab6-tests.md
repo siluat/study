@@ -413,3 +413,19 @@ Style attributes have the highest priority:
     >>> browser.load(url2)
     >>> browser.document.children[0].children[0].children[0].node.style['color']
     'blue'
+
+6.7 Font Properties
+-------------------
+
+Finally, let's test that the default style sheet gives appropriate
+sizes to things, all the way down to the display list:
+
+    >>> url = test.socket.serve("<a>blue</a><i>italic</i><b>bold</b><small>small</small><big>big")
+    >>> browser = lab6.Browser()
+    >>> browser.load(lab6.URL(url))
+    >>> browser.display_list #doctest: +NORMALIZE_WHITESPACE
+    [DrawText(top=21.1875 left=13 bottom=33.1875 text=blue font=Font size=12 weight=normal slant=roman style=None),
+     DrawText(top=21.1875 left=73 bottom=33.1875 text=italic font=Font size=12 weight=normal slant=italic style=None),
+     DrawText(top=21.1875 left=157 bottom=33.1875 text=bold font=Font size=12 weight=bold slant=roman style=None),
+     DrawText(top=22.6875 left=217 bottom=32.6875 text=small font=Font size=10 weight=normal slant=roman style=None),
+     DrawText(top=20.4375 left=277 bottom=33.4375 text=big font=Font size=13 weight=normal slant=roman style=None)]

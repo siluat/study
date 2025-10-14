@@ -52,3 +52,6 @@ def patch(existing_cls):
             raise ValueError(f"Cannot patch {existing_cls}")
         return existing_cls
     return decorator
+
+def delete(f):
+    return f
