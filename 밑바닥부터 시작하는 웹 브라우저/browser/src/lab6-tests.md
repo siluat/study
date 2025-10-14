@@ -101,68 +101,69 @@ This should in fact cause a background rectangle to be generated:
 6.3 Selectors
 -------------
 
-A tag selector stores its tag, the key-value pair.
+A tag selector stores its tag, the key-value pair, and a priority of 1.
 
     >>> lab6.CSSParser("div { foo: bar }").parse()
-    [(TagSelector(tag=div), {'foo': 'bar'})]
+    [(TagSelector(tag=div, priority=1), {'foo': 'bar'})]
 
-A descendant selector stores its ancestor and descendant as TagSelectors
+A descendant selector stores its ancestor and descendant as TagSelectors,
+with a priority that sums them.
 
     >>> lab6.CSSParser("div span { foo: bar }").parse()
-    [(DescendantSelector(ancestor=TagSelector(tag=div), descendant=TagSelector(tag=span)), {'foo': 'bar'})]
+    [(DescendantSelector(ancestor=TagSelector(tag=div, priority=1), descendant=TagSelector(tag=span, priority=1), priority=2), {'foo': 'bar'})]
 
     >>> lab6.CSSParser("div span h1 { foo: bar }").parse()
-    [(DescendantSelector(ancestor=DescendantSelector(ancestor=TagSelector(tag=div), descendant=TagSelector(tag=span)), descendant=TagSelector(tag=h1)), {'foo': 'bar'})]
+    [(DescendantSelector(ancestor=DescendantSelector(ancestor=TagSelector(tag=div, priority=1), descendant=TagSelector(tag=span, priority=1), priority=2), descendant=TagSelector(tag=h1, priority=1), priority=3), {'foo': 'bar'})]
 
 Multiple rules can be present.
 
     >>> lab6.CSSParser("div { foo: bar } span { baz : baz2 }").parse()
-    [(TagSelector(tag=div), {'foo': 'bar'}), (TagSelector(tag=span), {'baz': 'baz2'})]
+    [(TagSelector(tag=div, priority=1), {'foo': 'bar'}), (TagSelector(tag=span, priority=1), {'baz': 'baz2'})]
 
 Unknown syntaxes are ignored.
 
     >>> lab6.CSSParser("a;").parse()
     []
     >>> lab6.CSSParser("a {;}").parse()
-    [(TagSelector(tag=a), {})]
+    [(TagSelector(tag=a, priority=1), {})]
     >>> lab6.CSSParser("{} a;").parse()
     []
     >>> lab6.CSSParser("a { p }").parse()
-    [(TagSelector(tag=a), {})]
+    [(TagSelector(tag=a, priority=1), {})]
     >>> lab6.CSSParser("a { p: v }").parse()
-    [(TagSelector(tag=a), {'p': 'v'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v'})]
     >>> lab6.CSSParser("a { p: ^ }").parse()
-    [(TagSelector(tag=a), {})]
+    [(TagSelector(tag=a, priority=1), {})]
     >>> lab6.CSSParser("a { p: ; }").parse()
-    [(TagSelector(tag=a), {})]
+    [(TagSelector(tag=a, priority=1), {})]
     >>> lab6.CSSParser("a { p: v; q }").parse()
-    [(TagSelector(tag=a), {'p': 'v'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v'})]
     >>> lab6.CSSParser("a { p: v; ; q: u }").parse()
-    [(TagSelector(tag=a), {'p': 'v', 'q': 'u'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v', 'q': 'u'})]
     >>> lab6.CSSParser("a { p: v; q:: u }").parse()
-    [(TagSelector(tag=a), {'p': 'v'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v'})]
 
 Whitespace can be present anywhere. This is an easy mistake to make
 with a scannerless parser like used here:
 
     >>> lab6.CSSParser("a {}").parse()
-    [(TagSelector(tag=a), {})]
+    [(TagSelector(tag=a, priority=1), {})]
     >>> lab6.CSSParser("a{}").parse()
-    [(TagSelector(tag=a), {})]
+    [(TagSelector(tag=a, priority=1), {})]
     >>> lab6.CSSParser("a{ }").parse()
-    [(TagSelector(tag=a), {})]
+    [(TagSelector(tag=a, priority=1), {})]
     >>> lab6.CSSParser("a {} ").parse()
-    [(TagSelector(tag=a), {})]
+    [(TagSelector(tag=a, priority=1), {})]
     >>> lab6.CSSParser("a {p:v} ").parse()
-    [(TagSelector(tag=a), {'p': 'v'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v'})]
     >>> lab6.CSSParser("a {p :v} ").parse()
-    [(TagSelector(tag=a), {'p': 'v'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v'})]
     >>> lab6.CSSParser("a { p:v} ").parse()
-    [(TagSelector(tag=a), {'p': 'v'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v'})]
     >>> lab6.CSSParser("a {p: v} ").parse()
-    [(TagSelector(tag=a), {'p': 'v'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v'})]
     >>> lab6.CSSParser("a {p:v } ").parse()
-    [(TagSelector(tag=a), {'p': 'v'})]
+    [(TagSelector(tag=a, priority=1), {'p': 'v'})]
 
 6.4 Applying Style Sheets
 -------------------------
@@ -242,3 +243,38 @@ You can use `..` to go up:
     URL(scheme=http, host=bar.com, port=80, path='/d')
     >>> lab6.URL("http://bar.com/a/b/c").resolve("../../../d")
     URL(scheme=http, host=bar.com, port=80, path='/d')
+
+6.5 Cascading
+-------------
+
+To test cascading, let's make a tiny HTML page and test styling it.
+
+    >>> html = lab6.Element("html", {}, None)
+    >>> body = lab6.Element("body", {}, html)
+    >>> div = lab6.Element("div", {}, body)
+    >>> html.children.append(body)
+    >>> body.children.append(div)
+
+Now we can style these elements with various rules to make sure
+cascading works. First, a test with no cascading:
+
+    >>> rules = lab6.CSSParser("html { background-color: green }").parse()
+    >>> lab6.style(html, sorted(rules, key=lab6.cascade_priority))
+    >>> html.style['background-color']
+    'green'
+
+Rules apply in order by default:
+
+    >>> rules = lab6.CSSParser("html { background-color: green }" + \
+    ...    "html { background-color: red }").parse()
+    >>> lab6.style(html, sorted(rules, key=lab6.cascade_priority))
+    >>> html.style['background-color']
+    'red'
+
+More descendant selectors means higher priority
+
+    >>> rules = lab6.CSSParser("html div { background-color: green }" + \
+    ...    "div { background-color: red }").parse()
+    >>> lab6.style(html, sorted(rules, key=lab6.cascade_priority))
+    >>> div.style['background-color']
+    'green'

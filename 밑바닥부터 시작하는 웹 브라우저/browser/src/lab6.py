@@ -120,17 +120,19 @@ class CSSParser:
 class TagSelector:
     def __init__(self, tag):
         self.tag = tag
+        self.priority = 1
 
     def matches(self, node):
         return isinstance(node, Element) and self.tag == node.tag
 
     def __repr__(self):
-        return "TagSelector(tag={})".format(self.tag)
+        return "TagSelector(tag={}, priority={})".format(self.tag, self.priority)
 
 class DescendantSelector:
     def __init__(self, ancestor, descendant):
         self.ancestor = ancestor
         self.descendant = descendant
+        self.priority = self.ancestor.priority + self.descendant.priority
 
     def matches(self, node):
         if not self.descendant.matches(node): return False
@@ -140,7 +142,7 @@ class DescendantSelector:
         return False
 
     def __repr__(self):
-        return ("DescendantSelector(ancestor={}, descendant={})".format(self.ancestor, self.descendant))
+        return ("DescendantSelector(ancestor={}, descendant={}, priority={})".format(self.ancestor, self.descendant, self.priority))
 
 def style(node, rules):
     node.style = {}
@@ -154,6 +156,10 @@ def style(node, rules):
             node.style[property] = value
     for child in node.children:
         style(child, rules)
+
+def cascade_priority(rule):
+    selector, body = rule
+    return selector.priority
 
 @wbetools.patch(BlockLayout)
 class BlockLayout:
@@ -194,7 +200,7 @@ class Browser:
             except:
                 continue
             rules.extend(CSSParser(body).parse())
-        style(self.nodes, rules)
+        style(self.nodes, sorted(rules, key=cascade_priority))
 
         self.document = DocumentLayout(self.nodes)
         self.document.layout()
