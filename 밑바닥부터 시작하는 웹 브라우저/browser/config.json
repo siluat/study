@@ -19,6 +19,10 @@
     "layout.md": {
       "lab": "lab5.py",
       "tests": "lab5-tests.md"
+    },
+    "style.md": {
+      "lab": "lab6.py",
+      "tests": "lab6-tests.md"
     }
   }
 }
