@@ -97,3 +97,70 @@ This should in fact cause a background rectangle to be generated:
 
     >>> browser.display_list
     [DrawRect(top=18 left=13 bottom=18 right=787 color=lightblue)]
+
+6.3 Selectors
+-------------
+
+A tag selector stores its tag, the key-value pair.
+
+    >>> lab6.CSSParser("div { foo: bar }").parse()
+    [(TagSelector(tag=div), {'foo': 'bar'})]
+
+A descendant selector stores its ancestor and descendant as TagSelectors
+
+    >>> lab6.CSSParser("div span { foo: bar }").parse()
+    [(DescendantSelector(ancestor=TagSelector(tag=div), descendant=TagSelector(tag=span)), {'foo': 'bar'})]
+
+    >>> lab6.CSSParser("div span h1 { foo: bar }").parse()
+    [(DescendantSelector(ancestor=DescendantSelector(ancestor=TagSelector(tag=div), descendant=TagSelector(tag=span)), descendant=TagSelector(tag=h1)), {'foo': 'bar'})]
+
+Multiple rules can be present.
+
+    >>> lab6.CSSParser("div { foo: bar } span { baz : baz2 }").parse()
+    [(TagSelector(tag=div), {'foo': 'bar'}), (TagSelector(tag=span), {'baz': 'baz2'})]
+
+Unknown syntaxes are ignored.
+
+    >>> lab6.CSSParser("a;").parse()
+    []
+    >>> lab6.CSSParser("a {;}").parse()
+    [(TagSelector(tag=a), {})]
+    >>> lab6.CSSParser("{} a;").parse()
+    []
+    >>> lab6.CSSParser("a { p }").parse()
+    [(TagSelector(tag=a), {})]
+    >>> lab6.CSSParser("a { p: v }").parse()
+    [(TagSelector(tag=a), {'p': 'v'})]
+    >>> lab6.CSSParser("a { p: ^ }").parse()
+    [(TagSelector(tag=a), {})]
+    >>> lab6.CSSParser("a { p: ; }").parse()
+    [(TagSelector(tag=a), {})]
+    >>> lab6.CSSParser("a { p: v; q }").parse()
+    [(TagSelector(tag=a), {'p': 'v'})]
+    >>> lab6.CSSParser("a { p: v; ; q: u }").parse()
+    [(TagSelector(tag=a), {'p': 'v', 'q': 'u'})]
+    >>> lab6.CSSParser("a { p: v; q:: u }").parse()
+    [(TagSelector(tag=a), {'p': 'v'})]
+
+Whitespace can be present anywhere. This is an easy mistake to make
+with a scannerless parser like used here:
+
+    >>> lab6.CSSParser("a {}").parse()
+    [(TagSelector(tag=a), {})]
+    >>> lab6.CSSParser("a{}").parse()
+    [(TagSelector(tag=a), {})]
+    >>> lab6.CSSParser("a{ }").parse()
+    [(TagSelector(tag=a), {})]
+    >>> lab6.CSSParser("a {} ").parse()
+    [(TagSelector(tag=a), {})]
+    >>> lab6.CSSParser("a {p:v} ").parse()
+    [(TagSelector(tag=a), {'p': 'v'})]
+    >>> lab6.CSSParser("a {p :v} ").parse()
+    [(TagSelector(tag=a), {'p': 'v'})]
+    >>> lab6.CSSParser("a { p:v} ").parse()
+    [(TagSelector(tag=a), {'p': 'v'})]
+    >>> lab6.CSSParser("a {p: v} ").parse()
+    [(TagSelector(tag=a), {'p': 'v'})]
+    >>> lab6.CSSParser("a {p:v } ").parse()
+    [(TagSelector(tag=a), {'p': 'v'})]
+    
