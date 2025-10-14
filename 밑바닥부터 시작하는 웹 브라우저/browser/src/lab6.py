@@ -176,6 +176,8 @@ def style(node, rules):
         node_pct = float(node.style["font-size"][:-1]) / 100
         parent_px = float(parent_font_size[:-2])
         node.style["font-size"] = str(node_pct * parent_px) + "px"
+    if node.style["color"] == "inherit":
+        node.style["color"] = node.parent.style["color"]
     for child in node.children:
         style(child, rules)
 
