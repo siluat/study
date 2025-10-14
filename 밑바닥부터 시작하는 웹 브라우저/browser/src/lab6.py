@@ -61,6 +61,8 @@ class CSSParser:
         self.literal(":")
         self.whitespace()
         val = self.word()
+        if val == "var":
+            raise Exception("Parsing error: var() is not supported")
         return prop.casefold(), val
 
     def ignore_until(self, chars):
