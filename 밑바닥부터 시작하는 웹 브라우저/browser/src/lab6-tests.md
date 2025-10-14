@@ -278,3 +278,138 @@ More descendant selectors means higher priority
     >>> lab6.style(html, sorted(rules, key=lab6.cascade_priority))
     >>> div.style['background-color']
     'green'
+
+6.6 Inherited Styles
+--------------------
+
+Let's re-make the tree to clear any styles on it:
+
+    >>> html = lab6.Element("html", {}, None)
+    >>> body = lab6.Element("body", {}, html)
+    >>> div = lab6.Element("div", {}, body)
+    >>> html.children.append(body)
+    >>> body.children.append(div)
+
+Let's give all of the elements a percentage font size:
+
+    >>> html.attributes["style"] = "font-size:150%"
+    >>> body.attributes["style"] = "font-size:150%"
+    >>> div.attributes["style"] = "font-size:150%"
+    >>> lab6.style(html, [])
+
+The font size of the `<div>` is computed relatively:
+
+    >>> lab6.INHERITED_PROPERTIES["font-size"]
+    '16px'
+    >>> 16 * 1.5 * 1.5 * 1.5
+    54.0
+    >>> div.style["font-size"]
+    '54.0px'
+
+If we change the `<body>` to be absolute, then the `<div>` is relative
+to that:
+
+    >>> body.attributes["style"] = "font-size:10px"
+    >>> lab6.style(html, [])
+    >>> div.style["font-size"]
+    '15.0px'
+
+Let's reset again and test that all of the necessary inherited
+properties are assigned to each element:
+
+    >>> html = lab6.Element("html", {}, None)
+    >>> body = lab6.Element("body", {}, html)
+    >>> div = lab6.Element("div", {}, body)
+    >>> html.children.append(body)
+    >>> body.children.append(div)
+
+The default styles for many elements are the same:
+
+    >>> lab6.style(html, [])
+    >>> html.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+    >>> lab6.style(body, [])
+    >>> body.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+    >>> lab6.style(div, [])
+    >>> div.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+
+    >>> rules = lab6.CSSParser(
+    ... "html { font-size: 10px} body { font-size: 90% } \
+    ... div { font-size: 90% } ").parse()
+
+Percentage font sizes work as expected:
+
+    >>> lab6.style(html, rules)
+    >>> html.style
+    {'font-size': '10px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+
+    >>> lab6.style(body, rules)
+    >>> body.style
+    {'font-size': '9.0px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+
+    >>> lab6.style(div, rules)
+    >>> div.style
+    {'font-size': '8.1px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+
+Inherited properties work (`font-weight` is an inherited property):
+
+    >>> rules = lab6.CSSParser("html { font-weight: bold}").parse()
+    >>> lab6.style(html, rules)
+    >>> html.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'bold', 'color': 'black'}
+    >>> lab6.style(body, rules)
+    >>> body.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'bold', 'color': 'black'}
+    >>> lab6.style(div, rules)
+    >>> div.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'bold', 'color': 'black'}
+
+Other properties do not:
+
+    >>> rules = lab6.CSSParser("html { background-color: green}").parse()
+    >>> lab6.style(html, rules)
+    >>> html.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black', 'background-color': 'green'}
+    >>> lab6.style(body, rules)
+    >>> body.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+    >>> lab6.style(div, rules)
+    >>> div.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+
+Descendant selectors work:
+
+    >>> rules = lab6.CSSParser("html div { background-color: green}").parse()
+    >>> lab6.style(html, rules)
+    >>> html.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+    >>> lab6.style(body, rules)
+    >>> body.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+    >>> lab6.style(div, rules)
+    >>> div.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black', 'background-color': 'green'}
+
+Priorities work (descendant selectors higher priority than tag selectors):
+
+    >>> rules = lab6.CSSParser(
+    ... "html div { background-color: green} div { background-color: blue").parse()
+    >>> lab6.style(html, rules)
+    >>> html.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+    >>> lab6.style(body, rules)
+    >>> body.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black'}
+    >>> lab6.style(div, rules)
+    >>> div.style
+    {'font-size': '16px', 'font-style': 'normal', 'font-weight': 'normal', 'color': 'black', 'background-color': 'green'}
+
+Style attributes have the highest priority:
+
+    >>> url2 = lab6.URL(test.socket.serve("<div style=\"color:blue\">Test</div>"))
+    >>> browser = lab6.Browser()
+    >>> browser.load(url2)
+    >>> browser.document.children[0].children[0].children[0].node.style['color']
+    'blue'
