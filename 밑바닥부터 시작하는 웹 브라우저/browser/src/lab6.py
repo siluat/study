@@ -5,6 +5,29 @@ from lab4 import Element, print_tree, HTMLParser
 from lab5 import DrawRect, DrawText, paint_tree
 from lab5 import BlockLayout, DocumentLayout, Browser
 
+@wbetools.patch(URL)
+class URL:
+    def resolve(self, url):
+        if "://" in url: return URL(url)
+        if not url.startswith("/"):
+            dir, _ = self.path.rsplit("/", 1)
+            while url.startswith("../"):
+                _, url = url.split("/", 1)
+                if "/" in dir:
+                    dir, _ = dir.rsplit("/", 1)
+            url = dir + "/" + url
+        if url.startswith("//"):
+            return URL(self.scheme + ":" + url)
+        else:
+            return URL(self.scheme + "://" + self.host + \
+                        ":" + str(self.port) + url)
+
+def tree_to_list(tree, list):
+    list.append(tree)
+    for child in tree.children:
+        tree_to_list(child, list)
+    return list
+
 class CSSParser:
     def __init__(self, s):
         self.s = s
@@ -119,14 +142,18 @@ class DescendantSelector:
     def __repr__(self):
         return ("DescendantSelector(ancestor={}, descendant={})".format(self.ancestor, self.descendant))
 
-def style(node):
+def style(node, rules):
     node.style = {}
+    for selector, body in rules:
+        if not selector.matches(node): continue
+        for property, value in body.items():
+            node.style[property] = value
     if isinstance(node, Element) and "style" in node.attributes:
         pairs = CSSParser(node.attributes["style"]).body()
         for property, value in pairs.items():
             node.style[property] = value
     for child in node.children:
-        style(child)
+        style(child, rules)
 
 @wbetools.patch(BlockLayout)
 class BlockLayout:
@@ -145,12 +172,30 @@ class BlockLayout:
                 cmds.append(DrawText(x, y, word, font))
         return cmds
 
+DEFAULT_STYLE_SHEET = CSSParser(open("Browser.css").read()).parse()
+
 @wbetools.patch(Browser)
 class Browser:
     def load(self, url):
         body = url.request()
         self.nodes = HTMLParser(body).parse()
-        style(self.nodes)
+
+        rules = DEFAULT_STYLE_SHEET.copy()
+        links = [node.attributes["href"]
+                    for node in tree_to_list(self.nodes, [])
+                    if isinstance(node, Element)
+                    and node.tag == "link"
+                    and node.attributes.get("rel") == "stylesheet"
+                    and "href" in node.attributes]
+        for link in links:
+            style_url = url.resolve(link)
+            try:
+                body = style_url.request()
+            except:
+                continue
+            rules.extend(CSSParser(body).parse())
+        style(self.nodes, rules)
+
         self.document = DocumentLayout(self.nodes)
         self.document.layout()
         self.display_list = []

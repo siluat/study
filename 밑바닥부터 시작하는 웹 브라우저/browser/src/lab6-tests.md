@@ -163,4 +163,82 @@ with a scannerless parser like used here:
     [(TagSelector(tag=a), {'p': 'v'})]
     >>> lab6.CSSParser("a {p:v } ").parse()
     [(TagSelector(tag=a), {'p': 'v'})]
-    
+
+6.4 Applying Style Sheets
+-------------------------
+
+Let's also test the `tree_to_list` helper function:
+
+    >>> url = lab6.URL(test.socket.serve("<div>Test</div>"))
+    >>> browser = lab6.Browser()
+    >>> browser.load(url)
+    >>> lab6.print_tree(browser.document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=15.0, node=<html>)
+         BlockLayout[block](x=13, y=18, width=774, height=15.0, node=<body>)
+           BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<div>)
+    >>> list = []
+    >>> retval = lab6.tree_to_list(browser.document, list)
+    >>> retval #doctest: +NORMALIZE_WHITESPACE
+    [DocumentLayout(),
+     BlockLayout[block](x=13, y=18, width=774, height=15.0, node=<html>),
+     BlockLayout[block](x=13, y=18, width=774, height=15.0, node=<body>),
+     BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<div>)]
+    >>> retval == list
+    True
+
+To test that our browser actually loads style sheets, we create a CSS
+file and load a page linking to it:
+
+    >>> cssurl = test.socket.serve("div { background-color: blue; }")
+    >>> htmlurl = test.socket.serve("""
+    ...    <link rel=stylesheet href='""" + cssurl + """'>
+    ...    <div>test</div>
+    ... """)
+    >>> browser = lab6.Browser()
+    >>> browser.load(lab6.URL(htmlurl))
+
+Now we make sure that the `div` is blue:
+
+    >>> browser.nodes.children[1].children[0].style["background-color"]
+    'blue'
+
+If the page doesn't exist, the browser doesn't crash:
+
+    >>> htmlurl = test.socket.serve("""
+    ...    <link rel=stylesheet href='/does/not/exist'>
+    ... """)
+    >>> browser.load(lab6.URL(htmlurl))
+
+This first test used an absolute URL, but let's also test relative URLs.
+
+    >>> lab6.URL("http://bar.com/").resolve("http://foo.com/")
+    URL(scheme=http, host=foo.com, port=80, path='/')
+
+    >>> lab6.URL("http://bar.com/").resolve("/url")
+    URL(scheme=http, host=bar.com, port=80, path='/url')
+
+    >>> lab6.URL("http://bar.com/url1").resolve("url2")
+    URL(scheme=http, host=bar.com, port=80, path='/url2')
+
+    >>> lab6.URL("http://bar.com/url1/").resolve("url2")
+    URL(scheme=http, host=bar.com, port=80, path='/url1/url2')
+
+    >>> lab6.URL("http://bar.com/url1/").resolve("//baz.com/url2")
+    URL(scheme=http, host=baz.com, port=80, path='/url2')
+
+A trailing slash is automatically added if omitted:
+
+    >>> lab6.URL("http://bar.com").resolve("url2")
+    URL(scheme=http, host=bar.com, port=80, path='/url2')
+
+You can use `..` to go up:
+
+    >>> lab6.URL("http://bar.com/a/b/c").resolve("d")
+    URL(scheme=http, host=bar.com, port=80, path='/a/b/d')
+    >>> lab6.URL("http://bar.com/a/b/c").resolve("../d")
+    URL(scheme=http, host=bar.com, port=80, path='/a/d')
+    >>> lab6.URL("http://bar.com/a/b/c").resolve("../../d")
+    URL(scheme=http, host=bar.com, port=80, path='/d')
+    >>> lab6.URL("http://bar.com/a/b/c").resolve("../../../d")
+    URL(scheme=http, host=bar.com, port=80, path='/d')
