@@ -1,9 +1,12 @@
 import wbetools
 import tkinter
+from lab2 import WIDTH, HEIGHT
 from lab3 import get_font
-from lab4 import Text, print_tree
-from lab5 import DrawRect
-from lab6 import DrawText, URL, BlockLayout, Browser
+from lab4 import Text, Element, print_tree, HTMLParser
+from lab5 import DrawRect, DocumentLayout, paint_tree
+from lab6 import CSSParser
+from lab6 import DEFAULT_STYLE_SHEET, style, cascade_priority
+from lab6 import DrawText, URL, BlockLayout, Browser, tree_to_list
 
 class LineLayout:
     def __init__(self, node, parent, previous):
@@ -155,6 +158,77 @@ class BlockLayout:
     def __repr__(self):
         return "BlockLayout[{}](x={}, y={}, width={}, height={})".format(
             self.layout_mode(), self.x, self.y, self.width, self.height)
+
+@wbetools.patch(Browser)
+class Browser:
+    def __init__(self):
+        self.window = tkinter.Tk()
+        self.canvas = tkinter.Canvas(
+            self.window,
+            width=WIDTH,
+            height=HEIGHT,
+            highlightthickness=0,
+            bg="white",
+        )
+
+        self.canvas.pack()
+
+        self.scroll = 0
+        self.window.bind("<Down>", self.scrolldown)
+        self.window.bind("<Up>", self.scrollup)
+        self.window.bind("<Button-1>", self.click)
+
+        self.url = None
+
+    def load(self, url):
+        self.url = url
+        
+        body = url.request()
+        self.nodes = HTMLParser(body).parse()
+
+        rules = DEFAULT_STYLE_SHEET.copy()
+        links = [node.attributes["href"]
+                    for node in tree_to_list(self.nodes, [])
+                    if isinstance(node, Element)
+                    and node.tag == "link"
+                    and node.attributes.get("rel") == "stylesheet"
+                    and "href" in node.attributes]
+        for link in links:
+            style_url = url.resolve(link)
+            try:
+                body = style_url.request()
+            except:
+                continue
+            rules.extend(CSSParser(body).parse())
+        style(self.nodes, sorted(rules, key=cascade_priority))
+
+        self.document = DocumentLayout(self.nodes)
+        self.document.layout()
+        self.display_list = []
+        paint_tree(self.document, self.display_list)
+        self.draw()
+
+    def click(self, e):
+        x, y = e.x, e.y
+
+        y += self.scroll
+
+        objs = [obj for obj in tree_to_list(self.document, [])
+                if obj.x <= x < obj.x + obj.width
+                and obj.y <= y < obj.y + obj.height]
+
+        if not objs:
+            return
+
+        elt = objs[-1].node
+
+        while elt:
+            if isinstance(elt, Text):
+                pass
+            elif elt.tag == "a" and "href" in elt.attributes:
+                url = self.url.resolve(elt.attributes["href"])
+                return self.load(url)
+            elt = elt.parent
 
 if __name__ == "__main__":
     import sys
