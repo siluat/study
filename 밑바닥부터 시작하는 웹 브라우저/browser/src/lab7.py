@@ -1,12 +1,12 @@
 import wbetools
 import tkinter
-from lab2 import WIDTH, HEIGHT
+from lab2 import WIDTH, HEIGHT, VSTEP, SCROLL_STEP
 from lab3 import get_font
 from lab4 import Text, Element, print_tree, HTMLParser
 from lab5 import DrawRect, DocumentLayout, paint_tree
 from lab6 import CSSParser
 from lab6 import DEFAULT_STYLE_SHEET, style, cascade_priority
-from lab6 import DrawText, URL, BlockLayout, Browser, tree_to_list
+from lab6 import DrawText, URL, BlockLayout, tree_to_list
 
 class LineLayout:
     def __init__(self, node, parent, previous):
@@ -159,31 +159,14 @@ class BlockLayout:
         return "BlockLayout[{}](x={}, y={}, width={}, height={})".format(
             self.layout_mode(), self.x, self.y, self.width, self.height)
 
-@wbetools.patch(Browser)
-class Browser:
+class Tab:
     def __init__(self):
-        self.window = tkinter.Tk()
-        self.canvas = tkinter.Canvas(
-            self.window,
-            width=WIDTH,
-            height=HEIGHT,
-            highlightthickness=0,
-            bg="white",
-        )
-
-        self.canvas.pack()
-
-        self.scroll = 0
-        self.window.bind("<Down>", self.scrolldown)
-        self.window.bind("<Up>", self.scrollup)
-        self.window.bind("<Button-1>", self.click)
-
         self.url = None
 
     def load(self, url):
-        self.url = url
-        
         body = url.request()
+        self.scroll = 0
+        self.url = url
         self.nodes = HTMLParser(body).parse()
 
         rules = DEFAULT_STYLE_SHEET.copy()
@@ -206,22 +189,27 @@ class Browser:
         self.document.layout()
         self.display_list = []
         paint_tree(self.document, self.display_list)
-        self.draw()
 
-    def click(self, e):
-        x, y = e.x, e.y
+    def draw(self, canvas):
+        for cmd in self.display_list:
+            if cmd.top > self.scroll + HEIGHT: continue
+            if cmd.bottom < self.scroll: continue
+            cmd.execute(self.scroll, canvas)
+        
+    def scrolldown(self):
+        max_y = max(self.document.height + 2*VSTEP - HEIGHT, 0)
+        self.scroll = min(self.scroll + SCROLL_STEP, max_y)
 
+    def scrollup(self):
+        self.scroll = max(0, self.scroll - SCROLL_STEP)
+
+    def click(self, x, y):
         y += self.scroll
-
         objs = [obj for obj in tree_to_list(self.document, [])
                 if obj.x <= x < obj.x + obj.width
                 and obj.y <= y < obj.y + obj.height]
-
-        if not objs:
-            return
-
+        if not objs: return
         elt = objs[-1].node
-
         while elt:
             if isinstance(elt, Text):
                 pass
@@ -230,7 +218,53 @@ class Browser:
                 return self.load(url)
             elt = elt.parent
 
+    def __repr__(self):
+        return "Tab()"
+
+class Browser:
+    def __init__(self):
+        self.window = tkinter.Tk()
+        self.canvas = tkinter.Canvas(
+            self.window,
+            width=WIDTH,
+            height=HEIGHT,
+            highlightthickness=0,
+            bg="white",
+        )
+
+        self.canvas.pack()
+
+        self.window.bind("<Down>", self.handle_down)
+        self.window.bind("<Up>", self.handle_up)
+        self.window.bind("<Button-1>", self.handle_click)
+
+        self.tabs = []
+        self.active_tab = None
+
+    def handle_down(self, e):
+        self.active_tab.scrolldown()
+        self.draw()
+
+    def handle_up(self, e):
+        self.active_tab.scrollup()
+        self.draw()
+
+    def handle_click(self, e):
+        self.active_tab.click(e.x, e.y)
+        self.draw()
+
+    def new_tab(self, url):
+        new_tab = Tab()
+        new_tab.load(url)
+        self.active_tab = new_tab
+        self.tabs.append(new_tab)
+        self.draw()
+
+    def draw(self):
+        self.canvas.delete("all")
+        self.active_tab.draw(self.canvas)
+
 if __name__ == "__main__":
     import sys
-    Browser().load(URL(sys.argv[1]))
+    Browser().new_tab(URL(sys.argv[1]))
     tkinter.mainloop()
