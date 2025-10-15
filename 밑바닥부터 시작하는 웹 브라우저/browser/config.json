@@ -23,6 +23,10 @@
     "style.md": {
       "lab": "lab6.py",
       "tests": "lab6-tests.md"
+    },
+    "chrome.md": {
+      "lab": "lab7.py",
+      "tests": "lab7-tests.md"
     }
   }
 }
