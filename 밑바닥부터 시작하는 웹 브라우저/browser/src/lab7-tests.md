@@ -20,7 +20,7 @@ Let's load a page with multiple lines (using `<br>`):
     >>> browser = lab7.Browser()
     >>> browser.new_tab(lab7.URL(url))
     >>> browser.tabs
-    [Tab()]
+    [Tab(history=[URL(scheme=http, host=test, port=80, path='/page0')])]
     >>> lab7.print_tree(browser.tabs[0].document.node)
      <html>
        <body>
@@ -54,6 +54,7 @@ Here is how the lines are represented in chapter 7:
 
 Whereas in chapter 6 there is no direct layout tree representation of
 text.
+
 
 7.3 Click Handling
 ------------------
@@ -91,6 +92,7 @@ Clicking the link navigates to a new page:
     >>> tab.url
     URL(scheme=http, host=test, port=80, path='/page0')
 
+
 7.4 Multiple Pages
 ------------------
 
@@ -100,8 +102,8 @@ The browser can have multiple tabs:
     >>> browser.new_tab(lab7.URL(url))
     >>> browser.new_tab(lab7.URL(url2))
     >>> browser.tabs #doctest: +NORMALIZE_WHITESPACE
-    [Tab(),
-     Tab()]
+    [Tab(history=[URL(scheme=http, host=test, port=80, path='/page0')]),
+     Tab(history=[URL(scheme=http, host=test, port=80, path='/page1')])]
 
 Here's the first page:
 
@@ -133,6 +135,7 @@ Here's the second page:
            LineLayout(x=13, y=18, width=774, height=15.0)
              TextLayout(x=13, y=20.25, width=60, height=12, word=Click)
              TextLayout(x=85, y=20.25, width=24, height=12, word=me)
+             
 
 7.5 Browser Chrome
 ------------------
@@ -140,15 +143,15 @@ Here's the second page:
 Clicking on a browser tab focuses it:
 
     >>> browser.active_tab
-    Tab()
+    Tab(history=[URL(scheme=http, host=test, port=80, path='/page1')])
     >>> rect = browser.chrome.tab_rect(0)
     >>> browser.handle_click(test.Event(rect.left + 1, rect.top + 1))
     >>> browser.active_tab
-    Tab()
+    Tab(history=[URL(scheme=http, host=test, port=80, path='/page0')])
     >>> rect = browser.chrome.tab_rect(1)
     >>> browser.handle_click(test.Event(rect.left + 1, rect.top + 1))
     >>> browser.active_tab
-    Tab()
+    Tab(history=[URL(scheme=http, host=test, port=80, path='/page1')])
 
 Click on the "new tab" button also works:
 
@@ -157,6 +160,30 @@ Click on the "new tab" button also works:
     >>> rect = browser.chrome.newtab_rect
     >>> browser.handle_click(test.Event(rect.left + 1, rect.top + 1))
     >>> browser.tabs #doctest: +NORMALIZE_WHITESPACE
-    [Tab(),
-     Tab(),
-     Tab()]
+    [Tab(history=[URL(scheme=http, host=test, port=80, path='/page0')]),
+     Tab(history=[URL(scheme=http, host=test, port=80, path='/page1')]),
+     Tab(history=[URL(scheme=https, host=browser.engineering, port=443, path='/')])]
+    
+    
+7.6 Navigation History
+----------------------
+
+When you navigate with links, you add to the browser history
+
+    >>> browser.tabs[1].click(14, 21)
+    >>> browser.tabs[1].url
+    URL(scheme=http, host=test, port=80, path='/page0')
+    >>> browser.tabs[1] #doctest: +NORMALIZE_WHITESPACE
+    Tab(history=[URL(scheme=http, host=test, port=80, path='/page1'),
+                 URL(scheme=http, host=test, port=80, path='/page0')])
+
+Navigating back restores the old page:
+
+    >>> browser.tabs[1].go_back()
+    >>> browser.tabs[1].url
+    URL(scheme=http, host=test, port=80, path='/page1')
+    >>> lab7.print_tree(browser.tabs[1].document.node)
+     <html>
+       <body>
+         <a href="http://test/page0">
+           'Click me'
