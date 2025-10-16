@@ -187,3 +187,43 @@ Navigating back restores the old page:
        <body>
          <a href="http://test/page0">
            'Click me'
+
+7.7 Editing the URL
+-------------------
+
+Clicking on the address bar focuses it:
+
+    >>> browser.handle_click(test.Event(50, 51))
+    >>> browser.chrome.focus
+    'address bar'
+
+The back button works:
+
+    >>> browser.active_tab = browser.tabs[1]
+    >>> browser.tabs[1].url
+    URL(scheme=http, host=test, port=80, path='/page1')
+    >>> browser.tabs[1].history
+    [URL(scheme=http, host=test, port=80, path='/page1')]
+    >>> browser.tabs[1].click(15, 25)
+    >>> browser.tabs[1].url
+    URL(scheme=http, host=test, port=80, path='/page0')
+    >>> browser.tabs[1].history #doctest: +NORMALIZE_WHITESPACE
+    [URL(scheme=http, host=test, port=80, path='/page1'),
+     URL(scheme=http, host=test, port=80, path='/page0')]
+    >>> rect = browser.chrome.back_rect
+    >>> browser.handle_click(test.Event(rect.left + 1, rect.top + 1))
+    >>> browser.tabs[1].url
+    URL(scheme=http, host=test, port=80, path='/page1')
+    >>> browser.tabs[1].history
+    [URL(scheme=http, host=test, port=80, path='/page1')]
+
+Pressing enter with text in the address bar works:
+
+    >>> browser.handle_click(test.Event(50, 51))
+    >>> browser.chrome.focus
+    'address bar'
+    >>> browser.chrome.address_bar = "http://test/page0"
+    >>> browser.handle_enter(test.Event(0, 0))
+    >>> browser.tabs[1].history #doctest: +NORMALIZE_WHITESPACE
+    [URL(scheme=http, host=test, port=80, path='/page1'),
+     URL(scheme=http, host=test, port=80, path='/page0')]

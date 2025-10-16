@@ -319,6 +319,8 @@ class DrawRect:
 class Chrome:
     def __init__(self, browser):
         self.browser = browser
+        self.focus = None
+        self.address_bar = ""
 
         self.font = get_font(20, "normal", "roman")
         self.font_height = self.font.metrics("linespace")
@@ -401,24 +403,50 @@ class Chrome:
             "<", self.font, "black"))
 
         cmds.append(DrawOutline(self.address_rect, "black", 1))
-        url = str(self.browser.active_tab.url)
-        cmds.append(DrawText(
-            self.address_rect.left + self.padding,
-            self.address_rect.top,
-            url, self.font, "black"))
+        if self.focus == "address bar":
+            cmds.append(DrawText(
+                self.address_rect.left + self.padding,
+                self.address_rect.top,
+                self.address_bar, self.font, "black"))
+            w = self.font.measure(self.address_bar)
+            cmds.append(DrawLine(
+                self.address_rect.left + self.padding + w,
+                self.address_rect.top,
+                self.address_rect.left + self.padding + w,
+                self.address_rect.bottom,
+                "purple", 1))
+        else:
+            url = str(self.browser.active_tab.url)
+            cmds.append(DrawText(
+                self.address_rect.left + self.padding,
+                self.address_rect.top,
+                url, self.font, "black"))
 
         return cmds
 
     def click(self, x, y):
+        self.focus = None
         if self.newtab_rect.containsPoint(x, y):
             self.browser.new_tab(URL("https://browser.engineering/"))
         elif self.back_rect.containsPoint(x, y):
             self.browser.active_tab.go_back()
+        elif self.address_rect.containsPoint(x, y):
+            self.focus = "address bar"
+            self.address_bar = ""
         else:
             for i, tab in enumerate(self.browser.tabs):
                 if self.tab_rect(i).containsPoint(x, y):
                     self.browser.active_tab = tab
                     break
+    
+    def keypress(self, char):
+        if self.focus == "address bar":
+            self.address_bar += char
+
+    def enter(self):
+        if self.focus == "address bar":
+            self.browser.active_tab.load(URL(self.address_bar))
+            self.focus = None
 
 class Browser:
     def __init__(self):
@@ -436,6 +464,8 @@ class Browser:
         self.window.bind("<Down>", self.handle_down)
         self.window.bind("<Up>", self.handle_up)
         self.window.bind("<Button-1>", self.handle_click)
+        self.window.bind("<Key>", self.handle_key)
+        self.window.bind("<Return>", self.handle_enter)
 
         self.tabs = []
         self.active_tab = None
@@ -455,6 +485,16 @@ class Browser:
         else:
             tab_y = e.y - self.chrome.bottom
             self.active_tab.click(e.x, tab_y)
+        self.draw()
+
+    def handle_key(self, e):
+        if len(e.char) == 0: return
+        if not (0x20 <= ord(e.char) < 0x7f): return
+        self.chrome.keypress(e.char)
+        self.draw()
+
+    def handle_enter(self, e):
+        self.chrome.enter()
         self.draw()
 
     def new_tab(self, url):
