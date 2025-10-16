@@ -3,7 +3,7 @@ import tkinter
 from lab2 import WIDTH, HEIGHT, VSTEP, SCROLL_STEP
 from lab3 import get_font
 from lab4 import Text, Element, print_tree, HTMLParser
-from lab5 import DrawRect, DocumentLayout, paint_tree
+from lab5 import DocumentLayout, paint_tree
 from lab6 import CSSParser
 from lab6 import DEFAULT_STYLE_SHEET, style, cascade_priority
 from lab6 import DrawText, URL, BlockLayout, tree_to_list
@@ -144,14 +144,17 @@ class BlockLayout:
         line.children.append(text)
         self.cursor_x += w + font.measure(" ")
 
+    def self_rect(self):
+        return Rect(self.x, self.y,
+            self.x + self.width, self.y + self.height)
+
     def paint(self):
         cmds = []
         bgcolor = self.node.style.get("background-color",
                                         "transparent")
 
         if bgcolor != "transparent":
-            x2, y2 = self.x + self.width, self.y + self.height
-            rect = DrawRect(self.x, self.y, x2, y2, bgcolor)
+            rect = DrawRect(self.self_rect(), bgcolor)
             cmds.append(rect)
         return cmds
 
@@ -159,9 +162,55 @@ class BlockLayout:
         return "BlockLayout[{}](x={}, y={}, width={}, height={})".format(
             self.layout_mode(), self.x, self.y, self.width, self.height)
 
+class DrawLine:
+    def __init__(self, x1, y1, x2, y2, color, thickness):
+        self.rect = Rect(x1, y1, x2, y2)
+        self.color = color
+        self.thickness = thickness
+
+    def execute(self, scroll, canvas):
+        canvas.create_line(
+            self.rect.left, self.rect.top - scroll,
+            self.rect.right, self.rect.bottom -scroll,
+            fill=self.color, width=self.thickness)
+
+class DrawOutline:
+    def __init__(self, rect, color, thickness):
+        self.rect = rect
+        self.color = color
+        self.thickness = thickness
+
+    def execute(self, scroll, canvas):
+        canvas.create_rectangle(
+            self.rect.left, self.rect.top - scroll,
+            self.rect.right, self.rect.bottom - scroll,
+            width=self.thickness,
+            outline=self.color)
+
+@wbetools.patch(DrawText)
+class DrawText:
+    def __init__(self, x1, y1, text, font, color):
+        self.rect = Rect(x1, y1, 
+            x1 + font.measure(text), y1 + font.metrics("linespace"))
+        self.text = text
+        self.font = font
+        self.color = color
+
+    def execute(self, scroll, canvas):
+        canvas.create_text(
+            self.rect.left, self.rect.top - scroll,
+            text=self.text,
+            font=self.font,
+            anchor='nw',
+            fill=self.color)
+
+    def __repr__(self):
+        return "DrawText(text={})".format(self.text)
+
 class Tab:
-    def __init__(self):
+    def __init__(self, tab_height):
         self.url = None
+        self.tab_height = tab_height
 
     def load(self, url):
         body = url.request()
@@ -190,14 +239,14 @@ class Tab:
         self.display_list = []
         paint_tree(self.document, self.display_list)
 
-    def draw(self, canvas):
+    def draw(self, canvas, offset):
         for cmd in self.display_list:
-            if cmd.top > self.scroll + HEIGHT: continue
-            if cmd.bottom < self.scroll: continue
-            cmd.execute(self.scroll, canvas)
+            if cmd.rect.top > self.scroll + self.tab_height: continue
+            if cmd.rect.bottom < self.scroll: continue
+            cmd.execute(self.scroll - offset, canvas)
         
     def scrolldown(self):
-        max_y = max(self.document.height + 2*VSTEP - HEIGHT, 0)
+        max_y = max(self.document.height + 2*VSTEP - self.tab_height, 0)
         self.scroll = min(self.scroll + SCROLL_STEP, max_y)
 
     def scrollup(self):
@@ -221,6 +270,106 @@ class Tab:
     def __repr__(self):
         return "Tab()"
 
+class Rect:
+    def __init__(self, left, top, right, bottom):
+        self.left = left
+        self.top = top
+        self.right = right
+        self.bottom = bottom
+
+    def containsPoint(self, x, y):
+        return x >= self.left and x < self.right \
+            and y >= self.top and y < self.bottom
+
+class DrawRect:
+    def __init__(self, rect, color):
+        self.rect = rect
+        self.color = color
+
+    def execute(self, scroll, canvas):
+        canvas.create_rectangle(
+            self.rect.left, self.rect.top - scroll,
+            self.rect.right, self.rect.bottom - scroll,
+            width=0,
+            fill=self.color)
+
+    def __repr__(self):
+        return "DrawRect(top={} left={} bottom={} right={} color={})".format(
+            self.rect.top, self.rect.left, self.rect.bottom,
+            self.rect.right, self.color)
+
+class Chrome:
+    def __init__(self, browser):
+        self.browser = browser
+
+        self.font = get_font(20, "normal", "roman")
+        self.font_height = self.font.metrics("linespace")
+
+        self.padding = 5
+        self.tabbar_top = 0
+        self.tabbar_bottom = self.font_height + 2*self.padding
+
+        plus_width = self.font.measure("+") + 2*self.padding
+        self.newtab_rect = Rect(
+            self.padding, self.padding,
+            self.padding + plus_width,
+            self.padding + self.font_height)
+
+        self.bottom = self.tabbar_bottom
+
+    def tab_rect(self, i):
+        tabs_start = self.newtab_rect.right + self.padding
+        tab_width = self.font.measure("Tab X") + 2*self.padding
+        return Rect(
+            tabs_start + tab_width * i, self.tabbar_top,
+            tabs_start + tab_width * (i + 1), self.tabbar_bottom)
+
+    def paint(self):
+        cmds = []
+        cmds.append(DrawRect(
+            Rect(0, 0, WIDTH, self.bottom),
+            "white"))
+        cmds.append(DrawLine(
+            0, self.bottom, WIDTH,
+            self.bottom, "black", 1))
+
+        cmds.append(DrawOutline(self.newtab_rect, "black", 1))
+        cmds.append(DrawText(
+            self.newtab_rect.left + self.padding,
+            self.newtab_rect.top,
+            "+", self.font, "black"))
+
+        for i, tab in enumerate(self.browser.tabs):
+            bounds = self.tab_rect(i)
+            cmds.append(DrawLine(
+                bounds.left, 0, bounds.left, bounds.bottom,
+                "black", 1))
+            cmds.append(DrawLine(
+                bounds.right, 0, bounds.right, bounds.bottom,
+                "black", 1))
+            cmds.append(DrawText(
+                bounds.left + self.padding, bounds.top + self.padding,
+                "Tab {}".format(i), self.font, "black"))
+
+            if tab == self.browser.active_tab:
+                cmds.append(DrawLine(
+                    0, bounds.bottom, bounds.left, bounds.bottom,
+                    "black", 1))
+                cmds.append(DrawLine(
+                    bounds.right, bounds.bottom, WIDTH, bounds.bottom,
+                    "black", 1))
+
+        return cmds
+
+    def click(self, x, y):
+        if self.newtab_rect.containsPoint(x, y):
+            self.browser.new_tab(URL("https://browser.engineering/"))
+        else:
+            for i, tab in enumerate(self.browser.tabs):
+                if self.tab_rect(i).containsPoint(x, y):
+                    self.browser.active_tab = tab
+                    break
+
 class Browser:
     def __init__(self):
         self.window = tkinter.Tk()
@@ -240,6 +389,7 @@ class Browser:
 
         self.tabs = []
         self.active_tab = None
+        self.chrome = Chrome(self)
 
     def handle_down(self, e):
         self.active_tab.scrolldown()
@@ -250,11 +400,15 @@ class Browser:
         self.draw()
 
     def handle_click(self, e):
-        self.active_tab.click(e.x, e.y)
+        if e.y < self.chrome.bottom:
+            self.chrome.click(e.x, e.y)
+        else:
+            tab_y = e.y - self.chrome.bottom
+            self.active_tab.click(e.x, tab_y)
         self.draw()
 
     def new_tab(self, url):
-        new_tab = Tab()
+        new_tab = Tab(HEIGHT + self.chrome.bottom)
         new_tab.load(url)
         self.active_tab = new_tab
         self.tabs.append(new_tab)
@@ -262,7 +416,9 @@ class Browser:
 
     def draw(self):
         self.canvas.delete("all")
-        self.active_tab.draw(self.canvas)
+        self.active_tab.draw(self.canvas, self.chrome.bottom)
+        for cmd in self.chrome.paint():
+            cmd.execute(0, self.canvas)
 
 if __name__ == "__main__":
     import sys
