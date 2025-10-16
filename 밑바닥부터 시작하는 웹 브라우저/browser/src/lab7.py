@@ -435,6 +435,10 @@ class Chrome:
         if self.focus == "address bar":
             self.address_bar += char
 
+    def backspace(self):
+        if self.focus == "address bar" and len(self.address_bar) > 0:
+            self.address_bar = self.address_bar[:-1]
+
     def enter(self):
         if self.focus == "address bar":
             self.browser.active_tab.load(URL(self.address_bar))
@@ -458,6 +462,7 @@ class Browser:
         self.window.bind("<Button-1>", self.handle_click)
         self.window.bind("<Key>", self.handle_key)
         self.window.bind("<Return>", self.handle_enter)
+        self.window.bind("<BackSpace>", self.handle_backspace)
 
         self.tabs = []
         self.active_tab = None
@@ -487,6 +492,10 @@ class Browser:
 
     def handle_enter(self, e):
         self.chrome.enter()
+        self.draw()
+
+    def handle_backspace(self, e):
+        self.chrome.backspace()
         self.draw()
 
     def new_tab(self, url):
