@@ -133,3 +133,30 @@ Here's the second page:
            LineLayout(x=13, y=18, width=774, height=15.0)
              TextLayout(x=13, y=20.25, width=60, height=12, word=Click)
              TextLayout(x=85, y=20.25, width=24, height=12, word=me)
+
+7.5 Browser Chrome
+------------------
+
+Clicking on a browser tab focuses it:
+
+    >>> browser.active_tab
+    Tab()
+    >>> rect = browser.chrome.tab_rect(0)
+    >>> browser.handle_click(test.Event(rect.left + 1, rect.top + 1))
+    >>> browser.active_tab
+    Tab()
+    >>> rect = browser.chrome.tab_rect(1)
+    >>> browser.handle_click(test.Event(rect.left + 1, rect.top + 1))
+    >>> browser.active_tab
+    Tab()
+
+Click on the "new tab" button also works:
+
+    >>> browser_engineering = 'https://browser.engineering/'
+    >>> test.socket.respond_ok(browser_engineering, "Web Browser Engineering homepage")
+    >>> rect = browser.chrome.newtab_rect
+    >>> browser.handle_click(test.Event(rect.left + 1, rect.top + 1))
+    >>> browser.tabs #doctest: +NORMALIZE_WHITESPACE
+    [Tab(),
+     Tab(),
+     Tab()]
