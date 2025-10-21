@@ -5,8 +5,17 @@ from lab3 import get_font
 from lab4 import Text, Element, print_tree, HTMLParser
 from lab5 import BLOCK_ELEMENTS, DocumentLayout
 from lab6 import CSSParser, style, cascade_priority, tree_to_list
-from lab7 import DrawText, BlockLayout, LineLayout, TextLayout
+from lab7 import DrawText, DrawLine, BlockLayout, LineLayout, TextLayout
 from lab7 import URL, Tab, Browser, Chrome, DrawRect, Rect
+
+@wbetools.patch(Element)
+class Element:
+    def __init__(self, tag, attributes, parent):
+        self.tag = tag
+        self.attributes = attributes
+        self.children = []
+        self.parent = parent
+        self.is_focused = False
 
 DEFAULT_STYLE_SHEET = CSSParser(open("browser8.css").read()).parse()
 
@@ -67,6 +76,10 @@ class InputLayout:
         color = self.node.style["color"]
         cmds.append(
             DrawText(self.x, self.y, text, self.font, color))
+
+        if self.node.is_focused:
+            cx = self.x + self.font.measure(text)
+            cmds.append(DrawLine(cx, self.y, cx, self.y + self.height, "purple", 1))
         return cmds
 
     def __repr__(self):
@@ -157,6 +170,7 @@ class Tab:
         self.url = None
         self.history = []
         self.tab_height = tab_height
+        self.focus = None
 
     def load(self, url):
         body = url.request()
@@ -189,11 +203,14 @@ class Tab:
         paint_tree(self.document, self.display_list)
 
     def click(self, x, y):
+        if self.focus:
+            self.focus.is_focused = False
+        self.focus = None
         y += self.scroll
         objs = [obj for obj in tree_to_list(self.document, [])
                 if obj.x <= x < obj.x + obj.width
                 and obj.y <= y < obj.y + obj.height]
-        if not objs: return
+        if not objs: return self.render()
         elt = objs[-1].node
         while elt:
             if isinstance(elt, Text):
@@ -203,8 +220,27 @@ class Tab:
                 return self.load(url)
             elif elt.tag == "input":
                 elt.attributes["value"] = ""
+                self.focus = elt
+                elt.is_focused = True
                 return self.render()
             elt = elt.parent
+        self.render()
+
+    def keypress(self, char):
+        if self.focus:
+            self.focus.attributes["value"] += char
+            self.render()
+
+@wbetools.patch(Chrome)
+class Chrome:
+    def keypress(self, char):
+        if self.focus == "address bar":
+            self.address_bar += char
+            return True
+        return False
+
+    def blur(self):
+        self.focus = None
 
 @wbetools.patch(Browser)
 class Browser:
@@ -231,6 +267,26 @@ class Browser:
         self.active_tab = None
         self.focus = None
         self.chrome = Chrome(self)
+
+    def handle_click(self, e):
+        if e.y < self.chrome.bottom:
+            self.focus = None
+            self.chrome.click(e.x, e.y)
+        else:
+            self.focus = "content"
+            self.chrome.blur()
+            tab_y = e.y - self.chrome.bottom
+            self.active_tab.click(e.x, tab_y)
+        self.draw()
+
+    def handle_key(self, e):
+        if len(e.char) == 0: return
+        if not (0x20 <= ord(e.char) < 0x7f): return
+        if self.chrome.keypress(e.char):
+            self.draw()
+        elif self.focus == "content":
+            self.active_tab.keypress(e.char)
+            self.draw()
 
 if __name__ == "__main__":
     import sys
