@@ -1,0 +1,93 @@
+Tests for WBE Chapter 8
+=======================
+
+Chapter 8 (Sending Information to Servers) introduces forms and shows how
+to implement simple input and button elements, plus submit forms to the server.
+It also includes the first implementation of an HTTP server, in order to show
+how the server processes form submissions.
+
+    >>> import test
+    >>> _ = test.socket.patch().start()
+    >>> _ = test.ssl.patch().start()
+    >>> import lab8
+
+8.2 Rendering Widgets
+---------------------
+
+Let's test how a simple form renders. Here's the form with two inputs
+and a button:
+
+    >>> url2 = test.socket.serve("""
+    ... <form action="/submit">
+    ...   <p>Name: <input name=name value=1></p>
+    ...   <p>Comment: <input name=comment value="2=3"></p>
+    ...   <p><button>Submit!</button></p>
+    ... </form>""")
+
+Here's how it renders; node the `InputLayout`s:
+
+    >>> browser = lab8.Browser()
+    >>> browser.new_tab(lab8.URL(url2))
+    >>> lab8.print_tree(browser.tabs[0].document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=45.0, node=<html>)
+         BlockLayout[block](x=13, y=18, width=774, height=45.0, node=<body>)
+           BlockLayout[block](x=13, y=18, width=774, height=45.0, node=<form action="/submit">)
+             BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<p>)
+               LineLayout(x=13, y=18, width=774, height=15.0)
+                 TextLayout(x=13, y=20.25, width=60, height=12, word=Name:)
+                 InputLayout(x=85, y=20.25, width=200, height=12, type=input)
+             BlockLayout[inline](x=13, y=33.0, width=774, height=15.0, node=<p>)
+               LineLayout(x=13, y=33.0, width=774, height=15.0)
+                 TextLayout(x=13, y=35.25, width=96, height=12, word=Comment:)
+                 InputLayout(x=121, y=35.25, width=200, height=12, type=input)
+             BlockLayout[inline](x=13, y=48.0, width=774, height=15.0, node=<p>)
+               LineLayout(x=13, y=48.0, width=774, height=15.0)
+                 InputLayout(x=13, y=50.25, width=200, height=12, type=button text=Submit!)
+
+The display list of a button should include its contents, and the display list
+of a text input should be its `value` attribute:
+
+    >>> form = browser.tabs[0].document.children[0].children[0].children[0]
+    >>> text_input = form.children[0].children[0].children[1]
+    >>> button = form.children[2].children[0].children[0]
+    >>> text_input.paint()
+    [DrawRect(top=20.25 left=85 bottom=32.25 right=285 color=lightblue), DrawText(text=1)]
+    >>> button.paint()
+    [DrawRect(top=50.25 left=13 bottom=62.25 right=213 color=orange), DrawText(text=Submit!)]
+
+Let's test mixed inline/block content, like an input and a `<div>` as siblings:
+
+    >>> block_inline_url = test.socket.serve("<input><div>")
+    >>> browser = lab8.Browser()
+    >>> browser.new_tab(lab8.URL(block_inline_url))
+
+In this case, because there is an inline element (the `<input>`) and a block'
+sibling (the `<div`), they should be contianed in a `BlockLayout[block]`, but the
+`<input>` element is in an `BlockLayout[inline]`:
+
+    >>> lab8.print_tree(browser.tabs[0].document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=15.0, node=<html>)
+         BlockLayout[block](x=13, y=18, width=774, height=15.0, node=<body>)
+           BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<input>)
+             LineLayout(x=13, y=18, width=774, height=15.0)
+               InputLayout(x=13, y=20.25, width=200, height=12, type=input)
+           BlockLayout[block](x=13, y=33.0, width=774, height=0, node=<div>)
+
+The painted output also is only drawing the input as 200px wide:
+
+    >>> browser.tabs[0].display_list
+    [DrawRect(top=20.25 left=13 bottom=32.25 right=213 color=lightblue), DrawText(text=)]
+
+If a `<button>` contains rich markup inside of it, it should be blank:
+
+    >>> url3 = test.socket.serve("""
+    ... <form action="/submit" method=post>
+    ... <button><b>Rich markup</b></button>
+    ... </form>""")
+    >>> browser = lab8.Browser()
+    >>> browser.new_tab(lab8.URL(url3))
+    Ignoring HTML contents inside button
+    >>> browser.tabs[0].display_list
+    [DrawRect(top=20.25 left=13 bottom=32.25 right=213 color=orange), DrawText(text=)]

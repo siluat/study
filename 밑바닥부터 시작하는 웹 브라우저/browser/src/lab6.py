@@ -270,7 +270,7 @@ class DrawText:
             anchor='nw',
             fill=self.color)
 
-DEFAULT_STYLE_SHEET = CSSParser(open("Browser.css").read()).parse()
+DEFAULT_STYLE_SHEET = CSSParser(open("browser6.css").read()).parse()
 
 @wbetools.patch(Browser)
 class Browser:

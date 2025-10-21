@@ -27,6 +27,10 @@
     "chrome.md": {
       "lab": "lab7.py",
       "tests": "lab7-tests.md"
+    },
+    "forms.md": {
+      "lab": "lab8.py",
+      "tests": "lab8-tests.md"
     }
   }
 }
