@@ -1,11 +1,12 @@
 import wbetools
 import tkinter
+from lab2 import WIDTH, HEIGHT
 from lab3 import get_font
 from lab4 import Text, Element, print_tree, HTMLParser
 from lab5 import BLOCK_ELEMENTS, DocumentLayout
 from lab6 import CSSParser, style, cascade_priority, tree_to_list
 from lab7 import DrawText, BlockLayout, LineLayout, TextLayout
-from lab7 import URL, Tab, Browser, DrawRect, Rect
+from lab7 import URL, Tab, Browser, Chrome, DrawRect, Rect
 
 DEFAULT_STYLE_SHEET = CSSParser(open("browser8.css").read()).parse()
 
@@ -152,6 +153,11 @@ def paint_tree(layout_object, display_list):
 
 @wbetools.patch(Tab)
 class Tab:
+    def __init__(self, tab_height):
+        self.url = None
+        self.history = []
+        self.tab_height = tab_height
+
     def load(self, url):
         body = url.request()
         self.scroll = 0
@@ -159,7 +165,7 @@ class Tab:
         self.history.append(url)
         self.nodes = HTMLParser(body).parse()
 
-        rules = DEFAULT_STYLE_SHEET.copy()
+        self.rules = DEFAULT_STYLE_SHEET.copy()
         links = [node.attributes["href"]
                     for node in tree_to_list(self.nodes, [])
                     if isinstance(node, Element)
@@ -172,13 +178,59 @@ class Tab:
                 body = style_url.request()
             except:
                 continue
-            rules.extend(CSSParser(body).parse())
-        style(self.nodes, sorted(rules, key=cascade_priority))
+            self.rules.extend(CSSParser(body).parse())
+        self.render()
 
+    def render(self):
+        style(self.nodes, sorted(self.rules, key=cascade_priority))
         self.document = DocumentLayout(self.nodes)
         self.document.layout()
         self.display_list = []
         paint_tree(self.document, self.display_list)
+
+    def click(self, x, y):
+        y += self.scroll
+        objs = [obj for obj in tree_to_list(self.document, [])
+                if obj.x <= x < obj.x + obj.width
+                and obj.y <= y < obj.y + obj.height]
+        if not objs: return
+        elt = objs[-1].node
+        while elt:
+            if isinstance(elt, Text):
+                pass
+            elif elt.tag == "a" and "href" in elt.attributes:
+                url = self.url.resolve(elt.attributes["href"])
+                return self.load(url)
+            elif elt.tag == "input":
+                elt.attributes["value"] = ""
+                return self.render()
+            elt = elt.parent
+
+@wbetools.patch(Browser)
+class Browser:
+    def __init__(self):
+        self.window = tkinter.Tk()
+        self.canvas = tkinter.Canvas(
+            self.window,
+            width=WIDTH,
+            height=HEIGHT,
+            highlightthickness=0,
+            bg="white",
+        )
+
+        self.canvas.pack()
+
+        self.window.bind("<Down>", self.handle_down)
+        self.window.bind("<Up>", self.handle_up)
+        self.window.bind("<Button-1>", self.handle_click)
+        self.window.bind("<Key>", self.handle_key)
+        self.window.bind("<Return>", self.handle_enter)
+        self.window.bind("<BackSpace>", self.handle_backspace)
+
+        self.tabs = []
+        self.active_tab = None
+        self.focus = None
+        self.chrome = Chrome(self)
 
 if __name__ == "__main__":
     import sys
