@@ -7,6 +7,20 @@ from lab6 import tree_to_list
 from lab8 import URL, Element, Browser, Tab
 from lab8 import DEFAULT_STYLE_SHEET
 
+RUNTIME_JS = open("runtime9.js").read()
+
+class JSContext:
+    def __init__(self):
+        self.interp = dukpy.JSInterpreter()
+        self.interp.export_function("log", print)
+        self.interp.evaljs(RUNTIME_JS)
+
+    def run(self, script, code):
+        try:
+            return self.interp.evaljs(code)
+        except dukpy.JSRuntimeError as e:
+            print("Script", script, "crashed", e)
+
 @wbetools.patch(Tab)
 class Tab:
     def load(self, url, payload=None):
@@ -16,6 +30,7 @@ class Tab:
         self.history.append(url)
         self.nodes = HTMLParser(body).parse()
 
+        self.js = JSContext()
         scripts = [node.attributes["src"] for node
                     in tree_to_list(self.nodes, [])
                     if isinstance(node, Element)
@@ -27,10 +42,7 @@ class Tab:
                 body = script_url.request()
             except:
                 continue
-            try:
-                dukpy.evaljs(body)
-            except dukpy.JSRuntimeError as e:
-                print("Script", script, "crashed", e)
+            self.js.run(script, body)
 
         self.rules = DEFAULT_STYLE_SHEET.copy()
         links = [node.attributes["href"]

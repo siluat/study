@@ -37,3 +37,38 @@ If instead the script crashes, the browser prints an error message:
 
 Note that in the last test I set the `ELLIPSIS` flag to elide the duktape stack
 trace.
+
+9.3 Exporting Functions
+-----------------------
+
+For the rest of these tests we're going to use `console.log` for most testing:
+
+    >>> script = "console.log('Hello, world!')"
+    >>> test.socket.respond(str(url2), b"HTTP/1.0 200 OK\r\n\r\n" + script.encode("utf8"))
+    >>> lab9.Browser().new_tab(url)
+    Hello, world!
+
+Note that you can print other data structures as well:
+
+    >>> script = "console.log([2, 3, 4])"
+    >>> test.socket.respond(str(url2), b"HTTP/1.0 200 OK\r\n\r\n" + script.encode("utf8"))
+    >>> lab9.Browser().new_tab(url)
+    [2, 3, 4]
+
+Let's test that variables work:
+
+    >>> script = "var x = 'Hello!'; console.log(x)"
+    >>> test.socket.respond(str(url2), b"HTTP/1.0 200 OK\r\n\r\n" + script.encode("utf8"))
+    >>> lab9.Browser().new_tab(url)
+    Hello!
+
+Next let's try to do two scripts:
+
+    >>> url2 = 'http://test.test/js1'
+    >>> url3 = 'http://test.test/js2'
+    >>> html_page = "<script src=" + url2 + "></script>" + "<script src=" + url3 + "></script>"
+    >>> test.socket.respond(str(url), b"HTTP/1.0 200 OK\r\n\r\n" + html_page.encode("utf8"))
+    >>> test.socket.respond(str(url2), b"HTTP/1.0 200 OK\r\n\r\nvar x = 'Testing, testing';")
+    >>> test.socket.respond(str(url3), b"HTTP/1.0 200 OK\r\n\r\nconsole.log(x);")
+    >>> lab9.Browser().new_tab(url)
+    Testing, testing
