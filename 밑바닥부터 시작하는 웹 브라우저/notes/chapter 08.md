@@ -44,4 +44,12 @@
   - 키 입력으로 input 요소의 값이 변경되는 경우 화면을 다시 그릴 필요는 없이 디스플레이 리스트만 다시 생성한다. draw 메서드가 아닌 render를 호출한다.
   - 실습 구현과 같은 계층구조로 된 포커스 핸들링은 그래픽 위젯을 처리하는 데 중요하다. iframe을 사용하는 페이지의 경우 실제 브라우저에서는 포커스 트리가 깊게 생성될 수도 있다.
   - 포커스된 input 요소에 커서를 그리기 위해 Element 클래스에 포커스 여부를 저장하기 위한 is_focused 필드를 추가하고 각 클릭 이벤트에서 is_focused 값을 상황에 맞게 설정한다. InputLayout 클래스의 paint 메서드에서 is_focused 값을 확인하여 커서를 그리기 위한 커맨트를 추가한다.
-
+- button 엘리먼트의 form submit 구현
+  - Tab의 click 메서드에서 버튼 태그의 클릭 이벤트를 감지한다. 클릭 이벤트가 발생하면 부모 노드를 올라가며 form 엘리먼트를 찾는다.
+  - 가장 가까운 부모 form 엘리먼트에 action 속성값이 존재한다면, 해당 form 엘리먼트의 모든 자식 노드를 탐색하여 input 엘리먼트를 찾는다.
+  - submit 처리를 하는 submit_form 메서드를 Tab 클래스에 추가한다.
+    - 모든 input 엘리먼트의 name 속성과 value 속성 값으로 폼 인코딩을 처리한다. 한 쌍은 name=value 형태로 만드로 각 쌍은 `&`로 연결한다.
+    - action 속성값을 url로, 인코딩한 데이터를 body로 전달해서 load 메서드를 호출한다.
+  - load 메서드에 payload 인수를 추가한다. load 메서드는 URL.request 호출시 payload를 전달한다.
+  - URL 클래스의 request 메서드에 payload 인수를 추가한다.
+    - payload가 존재하면 method를 POST로 설정하고 Content-Length 헤더를 추가한다. 또한 request 뒤에 payload를 추가한다.

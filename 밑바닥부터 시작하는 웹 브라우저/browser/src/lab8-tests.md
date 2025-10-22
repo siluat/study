@@ -122,3 +122,67 @@ Clicking on the back button
     >>> browser.focus
     'content'
     >>> browser.chrome.focus
+
+8.4 Submitting Forms
+--------------------
+
+This chapter adds the ability to submit a POST request in addition to a GET
+one.
+
+    >>> url2 = test.socket.serve("""
+    ... <form action="/submit">
+    ...   <p>Name: <input name=name value=1></p>
+    ...   <p>Comment: <input name=comment value="2=3"></p>
+    ...   <p><button>Submit!</button></p>
+    ... </form>""")
+    >>> browser = lab8.Browser()
+    >>> browser.new_tab(lab8.URL(url2))
+
+    >>> url = 'http://test/submit'
+    >>> request_body = "name=1&comment=2%3D3"
+    >>> test.socket.respond_ok(url,
+    ...    "<div>Form submitted</div>", method="POST", body=request_body)
+    >>> body = lab8.URL(url).request(request_body)
+    >>> test.socket.last_request(url)
+    b'POST /submit HTTP/1.0\r\nContent-Length: 20\r\nHost: test\r\n\r\nname=1&comment=2%3D3'
+
+Forms are submitted via a click on the submit button.
+
+    >>> browser.handle_click(test.Event(20, 55 + browser.chrome.bottom))
+    >>> lab8.print_tree(browser.tabs[0].document.node)
+     <html>
+       <body>
+         <div>
+           'Form submitted'
+
+8.6 Receiving POST Requests
+---------------------------
+
+There are no tests for this section since `do_request` doesn't exist yet.
+
+8.7 Generating Web Pages
+------------------------
+
+    >>> import server8
+
+The server handles a GET request to the "/" URL:
+
+    >>> server8.do_request("GET", "/", {}, "")
+    ('200 OK', '<!doctype html><form action=add method=post><p><input name=guest></p><p><button>Sign the book!</button></p></form><p>Pavel was here</p>')
+
+GET requests to other URLs return a 404 page:
+
+    >>> server8.do_request("GET", "/unknown", {}, "")
+    ('404 Not Found', '<!doctype html><h1>GET /unknown not found!</h1>')
+
+A POST request is supported at the "/add" URL, which will parse out the `guest`
+parameter from the body, insert it into the guestbook, and return it as part of
+the response page:
+
+    >>> server8.do_request("POST", "/add", {}, "guest=Chris")
+    ('200 OK', '<!doctype html><form action=add method=post><p><input name=guest></p><p><button>Sign the book!</button></p></form><p>Pavel was here</p><p>Chris</p>')
+
+POST requests to other URLs return 404 pages:
+
+    >>> server8.do_request("POST", "/", {}, "")
+    ('404 Not Found', '<!doctype html><h1>POST / not found!</h1>')

@@ -1,5 +1,8 @@
 import wbetools
+import socket
+import ssl
 import tkinter
+import urllib.parse
 from lab2 import WIDTH, HEIGHT
 from lab3 import get_font
 from lab4 import Text, Element, print_tree, HTMLParser
@@ -16,6 +19,49 @@ class Element:
         self.children = []
         self.parent = parent
         self.is_focused = False
+
+@wbetools.patch(URL)
+class URL:
+    def request(self, payload=None):
+        s = socket.socket(
+            family=socket.AF_INET,
+            type=socket.SOCK_STREAM,
+            proto=socket.IPPROTO_TCP,
+        )
+        s.connect((self.host, self.port))
+
+        if self.scheme == "https":
+            ctx = ssl.create_default_context()
+            s = ctx.wrap_socket(s, server_hostname=self.host)
+
+        method = "POST" if payload else "GET"
+        request = "{} {} HTTP/1.0\r\n".format(method, self.path)
+        if payload:
+            length = len(payload.encode("utf8"))
+            request += "Content-Length: {}\r\n".format(length)
+        request += "Host: {}\r\n".format(self.host)
+        request += "\r\n"
+        if payload: request += payload
+        s.send(request.encode("utf8"))
+        response = s.makefile("r", encoding="utf8", newline="\r\n")
+
+        statusline = response.readline()
+        version, status, explanation = statusline.split(" ", 2)
+
+        response_headers = {}
+        while True:
+            line = response.readline()
+            if line == "\r\n": break
+            header, value = line.split(":", 1)
+            response_headers[header.casefold()] = value.strip()
+
+        assert "transfer-encoding" not in response_headers
+        assert "content-encoding" not in response_headers
+
+        body = response.read()
+        s.close()
+
+        return body
 
 DEFAULT_STYLE_SHEET = CSSParser(open("browser8.css").read()).parse()
 
@@ -172,8 +218,8 @@ class Tab:
         self.tab_height = tab_height
         self.focus = None
 
-    def load(self, url):
-        body = url.request()
+    def load(self, url, payload=None):
+        body = url.request(payload)
         self.scroll = 0
         self.url = url
         self.history.append(url)
@@ -223,8 +269,31 @@ class Tab:
                 self.focus = elt
                 elt.is_focused = True
                 return self.render()
+            elif elt.tag == "button":
+                while elt:
+                    if elt.tag == "form" and "action" in elt.attributes:
+                        return self.submit_form(elt)
+                    elt = elt.parent
             elt = elt.parent
         self.render()
+
+    def submit_form(self, elt):
+        inputs = [node for node in tree_to_list(elt, [])
+                    if isinstance(node, Element)
+                    and node.tag == "input"
+                    and "name" in node.attributes]
+
+        body = ""
+        for input in inputs:
+            name = input.attributes["name"]
+            value = input.attributes.get("value", "")
+            name = urllib.parse.quote(name)
+            value = urllib.parse.quote(value)
+            body += "&" + name + "=" + value
+        body = body[1:]
+
+        url = self.url.resolve(elt.attributes["action"])
+        self.load(url, body)
 
     def keypress(self, char):
         if self.focus:
