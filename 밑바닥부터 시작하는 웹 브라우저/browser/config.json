@@ -31,6 +31,10 @@
     "forms.md": {
       "lab": "lab8.py",
       "tests": "lab8-tests.md"
+    },
+    "scripts.md": {
+      "lab": "lab9.py",
+      "tests": "lab9-tests.md"
     }
   }
 }
