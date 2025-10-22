@@ -171,7 +171,7 @@ python3 lab7.py https://browser.engineering/
 
 ```bash
 cd src
-python3 server8.py  # POST 동작 확인을 위한 헬프 서버
+python3 server8.py  # 헬프 서버 실행, 아래와 같이 POST 동작 확인을 위한 localhost 페이지에 접근할 때 필요
 python3 lab8.py http://localhost:8000/
 ```
 
