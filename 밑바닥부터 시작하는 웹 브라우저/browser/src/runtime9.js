@@ -21,6 +21,12 @@ Node.prototype.addEventListener = function(type, listener) {
   list.push(listener);
 }
 
+Object.defineProperty(Node.prototype, 'innerHTML', {
+  set: function(s) {
+    call_python("innerHTML_set", this.handle, s.toString());
+  }
+});
+
 Node.prototype.dispatchEvent = function(type) {
   var handle = this.handle;
   var list = (LISTENERS[handle] && LISTENERS[handle][type]) || [];

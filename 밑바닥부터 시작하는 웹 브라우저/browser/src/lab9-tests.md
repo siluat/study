@@ -227,3 +227,65 @@ let's also test clicking the link:
 
 Note that we navigated to a new page---that's because we allowed the
 default action to occur.
+
+9.8 Modifying the DOM
+---------------------
+
+Testing `innerHTML` is tricky because it knowingly misbehaves on hard-to-parse
+HTML fragments. So we must purposely avoid testing those.
+
+    >>> js = b.tabs[0].js
+    >>> void(js.run("test", "document.querySelectorAll('p')[0].innerHTML" +
+    ...     " = 'This is a <b id=new>new</b> element!'"))
+
+Once we've changed the page, the browser should re-render:
+
+    >>> lab9.print_tree(b.tabs[0].document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=30.0, node=<html>)
+         BlockLayout[block](x=13, y=18, width=774, height=30.0, node=<body>)
+           BlockLayout[block](x=13, y=18, width=774, height=30.0, node=<div>)
+             BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<p id="blah">)
+               LineLayout(x=13, y=18, width=774, height=15.0)
+                 TextLayout(x=13, y=20.25, width=48, height=12, word=This)
+                 TextLayout(x=73, y=20.25, width=24, height=12, word=is)
+                 TextLayout(x=109, y=20.25, width=12, height=12, word=a)
+                 TextLayout(x=133, y=20.25, width=36, height=12, word=new)
+                 TextLayout(x=181, y=20.25, width=96, height=12, word=element!)
+             BlockLayout[inline](x=13, y=33.0, width=774, height=15.0, node=<p class="ipsum">)
+               LineLayout(x=13, y=33.0, width=774, height=15.0)
+                 TextLayout(x=13, y=35.25, width=60, height=12, word=Ipsum)
+
+Note that there's now many `TextLayout`s inside the first `LineLayout`, one per
+new word.
+
+Now that we've modified the page we should be able to find the new elements:
+
+    >>> js.run("test", "document.querySelectorAll('b').length")
+    1
+
+We should also be able to delete nodes this way:
+
+    >>> void(js.run("test", "var old_b = document.querySelectorAll('b')[0]"))
+    >>> void(js.run("test", "document.querySelectorAll('p')[0].innerHTML = 'Lorem'"))
+    >>> js.run("test", "document.querySelectorAll('b').length")
+    0
+
+The page is re-rendered again:
+
+    >>> lab9.print_tree(b.tabs[0].document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=30.0, node=<html>)
+         BlockLayout[block](x=13, y=18, width=774, height=30.0, node=<body>)
+           BlockLayout[block](x=13, y=18, width=774, height=30.0, node=<div>)
+             BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<p id="blah">)
+               LineLayout(x=13, y=18, width=774, height=15.0)
+                 TextLayout(x=13, y=20.25, width=60, height=12, word=Lorem)
+             BlockLayout[inline](x=13, y=33.0, width=774, height=15.0, node=<p class="ipsum">)
+               LineLayout(x=13, y=33.0, width=774, height=15.0)
+                 TextLayout(x=13, y=35.25, width=60, height=12, word=Ipsum)
+
+Despite this, the old nodes should stick around:
+
+    >>> js.run("test", "old_b.getAttribute('id')")
+    'new'

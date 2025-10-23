@@ -43,3 +43,12 @@
   - 자바스크립트 런타임은 이벤트 리스너를 관리하고, 전달받은 이벤트에 매칭되는 이벤트 리스너를 호출한다.
     - 이벤트 리스너를 추가하기 위한 `addEventListener` 함수를 Node 객체에 추가한다.
     - 이벤트를 전달받아 해당 이벤트에 매칭되는 이벤트 리스너를 호출하는 `dispatchEvent` 함수를 Node 객체에 추가한다.
+- innerHTML 쓰기 지원
+  - 자바스크립트 런타임에 익스포트할 `innerHTML_set` 메서드를 JSContext에 구현한다.
+    - 전달받은 문자열을 HTMLParser로 파싱하고 결과 노드를 대상 노드의 자식 노드로 추가한다.
+    - HTMLParser로 파싱할 때 실습 브라우저는 HTML 조각을 html과 body로 감싸는 편법을 사용한다. 실제 브라우저는 표준화된 파싱 알고리즘(https://html.spec.whatwg.org/#parsing-html-fragments)을 사용한다.
+    - 페이지가 변경되었으므로 render 메서드를 호출하여 업데이트한다.
+      - 전체 페이지에 대해 레이아웃을 재수행하는 것은 비효율적인데 이에 대해서는 16장에서 다시 다룬다.
+  - 자바스크립트 런타입에서는 Node 객체에 `innerText` 속성을 정의하고, setter 함수가 브라우저가 익스포트한 innerHTML_set 함수를 실행하도록 구현한다.
+  - innerHTML를 통해 `<script>`나 `<link>` 엘리먼트를 추가할 수 있지만 현재 구현은 해당 방식을 지원하지 못한다.
+  - 이 구현에는 메모리 릭이 있다. 만약 자바스크립트에서 HTML 엘리먼트에 접근하고 innerHTML을 사용해 페이지에서 그 엘리먼트를 삭제하면, 파이썬은 그 Element 객체를 가비지 컬렉션 할 수 없다. 참고: [Cross-Component Garbage Collection](https://research.google/pubs/cross-component-garbage-collection/)
