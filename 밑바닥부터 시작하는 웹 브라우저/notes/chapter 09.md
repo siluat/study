@@ -1,5 +1,11 @@
 # Chapter 9 대화형 스크립트 실행하기
 
+## 자바스크립트의 Node 객체와 브라우저의 Element/Text 객체 사이의 관계
+
+자바스크립트의 Node 객체와 브라우저의 Element/Text 객체 사이는 핸들을 통해 유지된다.
+
+![자바스크립트의 Node 객체와 브라우저의 Element/Text 객체 사이의 관계](./assets/scripts-handles-2.gif)
+
 ## 실습
 
 - 자바스크립트 파일 로드
@@ -13,4 +19,15 @@
   - Tab 객체의 load 메서드는 페이지 로드시 JSContext를 초기화하고 현재 로드하는 페이지의 모든 스크립트를 실행한다.
     - 모든 스크립트에서 하나의 JSContext를 사용하는 부수 효과로 두 개 이상의 스크립트를 실행할 때 먼저 실행된 스크립트에서 선언한 변수를 이후 실행하는 스크립트에서도 사용 가능하다.
   - JSInterpreter 객체의 `export_function` 메서드를 사용해서 파이썬의 함수를 해당 자바스크립트 런타임으로 익스포트할 수 있다. JSInterpreter로 실행되는 자바스크립트 런타임에서는 `call_python` 메서드를 사용해서 파이썬에서 익스포트한 함수를 호출할 수 있다. 이 점을 응용하여 call_python 메서드로 "log" 이름으로 익스포트한 `print` 함수가 정의된 console 객체의 정의를 자바스크립트 런타임에 전달하면, 이후 자바스크립트 실행에서 console.log 함수 호출시 파이썬의 print 함수가 호출된다.
-
+- 자바스크립트 런타임에 DOM API 제공: 실습 브라우저에서는 다음 API만 간략하게 구현한다.
+  - `querySelectorAll`: 실제 브라우저는 NodeList를 반환하지만 실습 브라우저는 배열을 반환
+  - `getAttribute`
+  - `innerHTML`: 실습 브라우저는 쓰기만 지원하고 읽기는 지원하지 않음
+- `querySelectorAll` 지원
+  - 자바스크립트 런타임에 익스포트하기 위한 `querySelectorAll` 메서드를 JSContext 클래스에 구현한다.
+  - `querySelectorAll` 메서드는 호출시 전달받은 셀렉터를 CSSParser로 파싱하고, 파싱된 셀렉터를 사용하여 현재 페이지의 모든 노드를 순회하며 셀렉터에 매칭되는 노드를 찾아 배열로 반환한다. JSContext 클래스에서 노드 트리에 접근할 수 있도록 생성시 Tab 객체를 전달받는다.
+  - Element 클래스로 정의된 노드 배열을 그대로 자바스크립트 런타임에 반환하면 정상적으로 전달할 수 없다. 따라서 간접 참조를 위한 '핸들'을 반환한다.
+  - 핸들 매핑을 관리하기 위해 `node_to_handle`, `handle_tonode` 맵 필드를 JSContext 클래스에 추가하여 사용한다. 
+  - `console.log` 구현과 마찬가지로 `querySelectorAll` 메서드를 익스포트하고, 자바스크립트 런타임에는 `call_python` 메서드로 `querySelectorAll` 함수를 호출하는 함수를 `document` 객체의 함수로 정의한다. 자바스크립트 런타임의 `querySelectorAll` 함수는 파이썬 런타임으로부터 반환된 handle을 Node 객체로 래핑해서 반환한다.
+    - 실제 브라우저에서 `querySelectorAll`은 여기와는 관계없는 난해한 이유로 NodeList 객체를 반환한다.
+    - 실습 브라우저에서는 `querySelectorAll`를 호출할 때마다 매번 Node 객체를 생성한다. 실제 브라우저는 그렇지 않다.

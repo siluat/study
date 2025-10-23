@@ -72,3 +72,39 @@ Next let's try to do two scripts:
     >>> test.socket.respond(str(url3), b"HTTP/1.0 200 OK\r\n\r\nconsole.log(x);")
     >>> lab9.Browser().new_tab(url)
     Testing, testing
+
+9.5 Returning Handles
+---------------------
+
+The `querySelectorAll` method is easiest to test by looking at the number of
+matching nodes:
+
+    >>> page = """<!doctype html>
+    ... <div>
+    ...   <p id=lorem>Lorem</p>
+    ...   <p class=ipsum>Ipsum</p>
+    ... </div>"""
+    >>> test.socket.respond(str(url), b"HTTP/1.0 200 OK\r\n\r\n" + page.encode("utf8"))
+    >>> b = lab9.Browser()
+    >>> b.new_tab(url)
+    >>> js = b.tabs[0].js
+    >>> js.run("test", "document.querySelectorAll('div').length")
+    1
+    >>> js.run("test", "document.querySelectorAll('p').length")
+    2
+    >>> js.run("test", "document.querySelectorAll('html').length")
+    1
+
+That last query is finding an implicit tag. Complex queries are also supported
+
+    >>> js.run("test", "document.querySelectorAll('html p').length")
+    2
+    >>> js.run("test", "document.querySelectorAll('html body div p').length")
+    2
+    >>> js.run("test", "document.querySelectorAll('body html div p').length")
+    0
+
+`querySelectorAll` should return `Node` objects:
+
+    >>> js.run("test", "document.querySelectorAll('html')[0] instanceof Node")
+    True
