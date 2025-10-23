@@ -1,6 +1,8 @@
 # Chapter 9 대화형 스크립트 실행하기
 
-## 자바스크립트의 Node 객체와 브라우저의 Element/Text 객체 사이의 관계
+## 이론 학습
+
+### 자바스크립트의 Node 객체와 브라우저의 Element/Text 객체 사이의 관계
 
 자바스크립트의 Node 객체와 브라우저의 Element/Text 객체 사이는 핸들을 통해 유지된다.
 
@@ -34,3 +36,10 @@
 - `getAttribute` 지원
   - 자바스크립트의 Node 객체에 `getAttribute` 함수를 추가한다. `getAttribute` 함수는 브라우저에서 익스포트한 `getAttribute` 함수를 호출하고 결과를 반환한다. 호출할 때 대상 노드 요소를 특정 수 있는 핸들을 전달한다.
   - JSContext 클래스는 핸들과 속성 이름을 전달받아 핸들에 해당하는 노드의 속성을 반환하는 `getAttribute` 메서드를 구현하고 익스포트한다.
+- 이벤트 처리
+  - 브라우저는 이벤트 감지시 해당 이벤트를 자바스크립트 런타임에 전달한다.
+    - 자바스크립트 런타임으로 이벤트를 전달하는 `dispatch_event` 메서드를 JSContext 클래스에 구현한다.
+    - 지금까지 Tab 클래스에 구현한 'click', 'keydown', 'submit' 이벤트 처리에서는 `dispatch_event` 메서드를 통해 자바스크립트 런타임의 Node 객체가 제공하는 `dispatchEvent` 함수를 호출해서 이벤트를 전달한다.
+  - 자바스크립트 런타임은 이벤트 리스너를 관리하고, 전달받은 이벤트에 매칭되는 이벤트 리스너를 호출한다.
+    - 이벤트 리스너를 추가하기 위한 `addEventListener` 함수를 Node 객체에 추가한다.
+    - 이벤트를 전달받아 해당 이벤트에 매칭되는 이벤트 리스너를 호출하는 `dispatchEvent` 함수를 Node 객체에 추가한다.
