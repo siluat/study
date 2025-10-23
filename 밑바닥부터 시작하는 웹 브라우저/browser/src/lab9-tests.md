@@ -289,3 +289,86 @@ Despite this, the old nodes should stick around:
 
     >>> js.run("test", "old_b.getAttribute('id')")
     'new'
+
+9.9 Event Defaults
+------------------
+
+Let's test each of our automatic event types. We'll need a new web page with a
+link, a button, and an input area:
+
+    >>> b.tabs[1].go_back()
+    >>> js = b.tabs[1].js
+
+Now we're going test five event handlers: clicking on the link, clicking on the
+input, typing into the input, clicking on the button, and submitting the form.
+We'll have a mix of `preventDefault` and non-`preventDefault` handlers to test
+that feature as well.
+
+    >>> void(js.run("test", "var a = document.querySelectorAll('a')[0]"))
+    >>> void(js.run("test", "var form = document.querySelectorAll('form')[0]"))
+    >>> void(js.run("test", "var input = document.querySelectorAll('input')[0]"))
+    >>> void(js.run("test", "var button = document.querySelectorAll('button')[0]"))
+
+Note that the `input` element has a value of `hi`:
+
+    >>> js.run("test", "input.getAttribute('value')")
+    'hi'
+
+Clicking on the link should be canceled because we don't actually want to
+navigate to a new page.
+
+    >>> void(js.run("test", "a.addEventListener('click', " +
+    ...     "function(e) { console.log('a clicked'); e.preventDefault()})"))
+
+For the `input` element, clicking should work, because we need to focus it to
+type into it. But let's cancel the `keydown` event just to test that that works.
+
+    >>> void(js.run("test", "input.addEventListener('click', " +
+    ...     "function(e) { console.log('input clicked')})"))
+    >>> void(js.run("test", "input.addEventListener('keydown', " +
+    ...     "function(e) { console.log('input typed'); e.preventDefault()})"))
+
+Finally, let's allow clicking on the button but then cancel the form submission:
+
+    >>> void(js.run("test", "button.addEventListener('click', " +
+    ...     "function(e) { console.log('button clicked')})"))
+    >>> void(js.run("test", "form.addEventListener('submit', " +
+    ...     "function(e) { console.log('form submitted'); e.preventDefault()})"))
+
+With these all set up, we need to do some clicking and typing to trigger these
+events. The display list gives us coordinates for clicking.
+
+    >>> lab9.print_tree(b.tabs[1].document)
+     DocumentLayout()
+       BlockLayout[block](x=13, y=18, width=774, height=30.0, node=<html>)
+         BlockLayout[block](x=13, y=18, width=774, height=30.0, node=<body>)
+           BlockLayout[inline](x=13, y=18, width=774, height=15.0, node=<a href="page2">)
+             LineLayout(x=13, y=18, width=774, height=15.0)
+               TextLayout(x=13, y=20.25, width=60, height=12, word=Click)
+               TextLayout(x=85, y=20.25, width=36, height=12, word=me!)
+           BlockLayout[inline](x=13, y=33.0, width=774, height=15.0, node=<form action="/post">)
+             LineLayout(x=13, y=33.0, width=774, height=15.0)
+               InputLayout(x=13, y=35.25, width=200, height=12, type=input)
+               InputLayout(x=225, y=35.25, width=200, height=12, type=button text=Submit)
+
+    a clicked
+    >>> b.tabs[1].click(14, 40)
+    input clicked
+    >>> b.tabs[1].keypress('t')
+    input typed
+    >>> b.tabs[1].click(230, 40)
+    button clicked
+    form submitted
+
+However, we should not have navigated away from the original URL, because we
+prevented submission:
+
+    >>> b.tabs[1].history
+    [URL(scheme=http, host=test, port=80, path='/page2')]
+    
+Similarly, when we clicked on the `input` element its `value` should be cleared,
+but when we then typed `t` into it that was canceled so the value should still
+be empty at the end:
+
+    >>> js.run("test", "input.getAttribute('value')")
+    ''
