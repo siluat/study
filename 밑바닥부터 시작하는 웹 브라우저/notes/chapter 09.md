@@ -31,3 +31,6 @@
   - `console.log` 구현과 마찬가지로 `querySelectorAll` 메서드를 익스포트하고, 자바스크립트 런타임에는 `call_python` 메서드로 `querySelectorAll` 함수를 호출하는 함수를 `document` 객체의 함수로 정의한다. 자바스크립트 런타임의 `querySelectorAll` 함수는 파이썬 런타임으로부터 반환된 handle을 Node 객체로 래핑해서 반환한다.
     - 실제 브라우저에서 `querySelectorAll`은 여기와는 관계없는 난해한 이유로 NodeList 객체를 반환한다.
     - 실습 브라우저에서는 `querySelectorAll`를 호출할 때마다 매번 Node 객체를 생성한다. 실제 브라우저는 그렇지 않다.
+- `getAttribute` 지원
+  - 자바스크립트의 Node 객체에 `getAttribute` 함수를 추가한다. `getAttribute` 함수는 브라우저에서 익스포트한 `getAttribute` 함수를 호출하고 결과를 반환한다. 호출할 때 대상 노드 요소를 특정 수 있는 핸들을 전달한다.
+  - JSContext 클래스는 핸들과 속성 이름을 전달받아 핸들에 해당하는 노드의 속성을 반환하는 `getAttribute` 메서드를 구현하고 익스포트한다.

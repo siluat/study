@@ -108,3 +108,17 @@ That last query is finding an implicit tag. Complex queries are also supported
 
     >>> js.run("test", "document.querySelectorAll('html')[0] instanceof Node")
     True
+
+9.6 Wrapping Handles
+--------------------
+
+Once we have a `Node` object we can call `getAttribute`:
+
+    >>> js.run("test", "document.querySelectorAll('p')[0].getAttribute('id')")
+    'lorem'
+
+Note that this is "live": as the page changes `querySelectorAll` gives new results:
+
+    >>> b.tabs[0].nodes.children[0].children[0].children[0].attributes['id'] = 'blah'
+    >>> js.run("test", "document.querySelectorAll('p')[0].getAttribute('id')")
+    'blah'
