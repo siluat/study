@@ -17,7 +17,7 @@
 - [x] Chapter 6 개발자 스타일 적용하기
 - [x] Chapter 7 버튼과 링크 처리하기
 - [x] Chapter 8 서버로 정보 보내기
-- [ ] Chapter 9 대화형 스크립트 실행하기
+- [x] Chapter 9 대화형 스크립트 실행하기
 - [ ] Chapter 10 사용자 데이터 보호하기
 - [ ] Chapter 11 시각적 효과
 - [ ] Chapter 12 태스크와 스레드 스케줄링
