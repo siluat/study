@@ -48,12 +48,17 @@ def do_request(session, method, url, headers, body):
     elif method == "GET" and url == "/comment.css":
         with open("comment9.css") as f:
             return "200 OK", f.read()
+    elif method == "GET" and url == "/login":
+        return "200 OK", login_form(session)
     elif method == "POST" and url == "/add":
         params = form_decode(body)
-        add_entry(params)
+        add_entry(session, params)
         return "200 OK", show_comments(session)
-    
-    return "404 Not Found", not_found(url, method)
+    elif method == "POST" and url == "/":
+        params = form_decode(body)
+        return do_login(session, params)
+    else:
+        return "404 Not Found", not_found(url, method)
 
 def form_decode(body):
     params = {}
@@ -62,29 +67,65 @@ def form_decode(body):
         params[name] = urllib.parse.unquote_plus(value)
     return params
 
-ENTRIES = [ 'Pavel was here' ]
+ENTRIES = [
+    ("No names. We are nameless!", "cerealkiller"),
+    ("HACK THE PLANET!!!", "crashoverride"),
+]
 
-def show_comments():
+LOGINS = {
+    "crashoverride": "0cool",
+    "cerealkiller": "emmanuel"
+}
+
+def show_comments(session):
     out = "<!doctype html>"
-    out += "<form action=add method=post>"
-    out +=   "<p><input name=guest></p>"
-    out +=   "<p><button>Sign the book!</button></p>"
-    out += "</form>"
-    for entry in ENTRIES:
-        out += "<p>" + entry + "</p>"
+    if "user" in session:
+        out += "<h1>Hello, " + session["user"] + "</h1>"
+        out += "<form action=/add method=post>"
+        out +=   "<p><input name=guest></p>"
+        out +=   "<p><button>Sign the book!</button></p>"
+        out += "</form>"
+    else:
+        out += "<a href=/login>Sign in to write in the guest book</a>"
+
+    for entry, who in ENTRIES:
+        out += "<p>" + entry + "\n"
+        out += "<i>by " + who + "</i></p>"
+
     out += "<link rel=stylesheet href=/comment.css>"
     out += "<strong></strong>"
     out += "<script src=/comment.js></script>"
     return out
+
+def login_form(session):
+    body = "<!doctype html>"
+    body += "<form action=/ method=post>"
+    body += "<p>Username: <input name=username></p>"
+    body += "<p>Password: <input name=password type=password></p>"
+    body += "<p><button>Log in</button></p>"
+    body += "</form>"
+    return body
+    
+def do_login(session, params):
+    username = params.get("username")
+    password = params.get("password")
+    if username in LOGINS and LOGINS[username] == password:
+        session["user"] = username
+        return "200 OK", show_comments(session)
+    else:
+        out = "<!doctype html>"
+        out += "<h1>Invalid password for {}</h1>".format(username)
+        return "401 Unauthorized", out
 
 def not_found(url, method):
     out = "<!doctype html>"
     out += "<h1>{} {} not found!</h1>".format(method, url)
     return out
 
-def add_entry(params):
+def add_entry(session,params):
+    if "user" not in session: return
     if 'guest' in params and len(params['guest']) <= 100:
-        ENTRIES.append(params['guest'])
+        ENTRIES.append((params['guest'], session['user']))
 
 if __name__ == "__main__":
     s = socket.socket(
