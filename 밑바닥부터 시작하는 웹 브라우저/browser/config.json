@@ -35,6 +35,10 @@
     "scripts.md": {
       "lab": "lab9.py",
       "tests": "lab9-tests.md"
+    },
+    "security.md": {
+      "lab": "lab10.py",
+      "tests": "lab10-tests.md"
     }
   }
 }
