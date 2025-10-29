@@ -21,3 +21,8 @@
   - URL 클래스의 request 메서드에서 요청을 전송할 때 대상 호스트로 저장된 쿠키가 있다면 쿠키 헤더에 해당 쿠키값을 추가한다.
   - URL 클래스의 request 메서드에서 응답을 처리할 때 쿠키 헤더가 있다면 쿠키 저장 공간에 해당 쿠키값을 저장한다.
   - 실제 브라우저는 하나의 요청에 여러 개의 Set-Cookie 헤더를 전송하는 경우도 처리할 수 있어야 한다.
+- 동기식 XMLHttpRequest 구현
+  - 자바스크립트 런타임에 XMLHttpRequest 객체를 구현한다.
+  - XMLHttpRequest 객체의 open 메서드를 구현한다. open 메서드는 요청 url, method를 초기화한다.
+  - XMLHttpRequest 객체의 send 메서드를 구현한다. send 메서드는 body를 전달받고 전송한다. 전송에는 브라우저 런타임에서 익스포트하는 XMLHttpRequest_send 함수를 사용한다.
+  - JSContext 클래스에 XMLHttpRequest_send 메서드를 추가한다. XMLHttpRequest_send 메서드는 URL 클래스의 request 메서드를 사용하여 요청을 전송하고 응답 본문을 반환한다.

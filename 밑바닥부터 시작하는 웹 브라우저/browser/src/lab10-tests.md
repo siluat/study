@@ -65,3 +65,50 @@ Cookie parameters are parsed correctly:
     >>> browser.new_tab(lab10.URL(url))
     >>> lab10.COOKIE_JAR["test.test"]
     'foo=baz; HttpOnly; SameSite=Lax; Secure'
+
+Testing XMLHttpRequest
+======================
+
+First, let's test the basic `XMLHttpRequest` functionality. We'll be
+making a lot of `XMLHttpRequest` calls so let's add a little helper
+for that:
+
+    >>> def void(s): return
+    >>> def xhrjs(url):
+    ...     return """x = new XMLHttpRequest();
+    ... x.open("GET", """ + repr(url) + """, false);
+    ... x.send();
+    ... console.log(x.responseText);"""
+
+Now let's test a simple same-site request:
+
+    >>> url = "http://about.blank/"
+    >>> test.socket.respond(url, b"HTTP/1.0 200 OK\r\n\r\n")
+    >>> url2 = "http://about.blank/hello"
+    >>> test.socket.respond(url2, b"HTTP/1.0 200 OK\r\n\r\nHello!")
+    >>> browser = lab10.Browser()
+    >>> browser.new_tab(lab10.URL(url))
+    >>> tab = browser.tabs[0]
+    >>> tab.js.run("test", xhrjs(url2))
+    Hello!
+
+Relative URLs also work:
+
+    >>> tab.js.run("test", xhrjs("/hello"))
+    Hello!
+
+Non-synchronous XHRs should fail:
+
+    >>> tab.js.run("test", "new XMLHttpRequest().open('GET', '/', true)") #doctest: +ELLIPSIS
+    Script test crashed Error: Asynchronous XHR is not supported
+    ...
+
+If cookies are present, they should be sent:
+
+    >>> lab10.COOKIE_JAR["about.blank"] = 'foo=bar'
+    >>> tab.js.run("test", xhrjs(url2))
+    Hello!
+    >>> test.socket.last_request(url2)
+    b'GET /hello HTTP/1.0\r\nHost: about.blank\r\nCookie: foo=bar\r\n\r\n'
+
+Note that the cookie value is sent.

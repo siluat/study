@@ -1,8 +1,10 @@
 import socket
 import ssl
 import tkinter
+import dukpy
 import wbetools
 from lab8 import URL,Browser
+from lab9 import JSContext
 
 @wbetools.patch(URL)
 class URL:
@@ -55,6 +57,38 @@ class URL:
         return body
 
 COOKIE_JAR = {}
+
+@wbetools.patch(JSContext)
+class JSContext:
+    def __init__(self, tab):
+        self.tab = tab
+
+        self.interp = dukpy.JSInterpreter()
+        self.interp.export_function("log", print)
+        self.interp.export_function("querySelectorAll", self.querySelectorAll)
+        self.interp.export_function("getAttribute", self.getAttribute)
+        self.interp.export_function("innerHTML_set", self.innerHTML_set)
+        self.interp.export_function("XMLHttpRequest_send", self.XMLHttpRequest_send)
+        with open("runtime10.js") as f:
+            self.interp.evaljs(f.read())
+
+        self.node_to_handle = {}
+        self.handle_to_node = {}
+
+    def XMLHttpRequest_send(self, method, url, body):
+        full_url = self.tab.url.resolve(url)
+        return full_url.request(body)
+
+    def run(self, script, code):
+        try:
+            result = self.interp.evaljs(code)
+            # Normalize JavaScript undefined/null to Python None
+            # dukpy may return {} or other values for undefined
+            if result == {} or result is None:
+                return None
+            return result
+        except dukpy.JSRuntimeError as e:
+            print("Script", script, "crashed", e)
 
 if __name__ == "__main__":
     import sys
