@@ -56,6 +56,9 @@ class URL:
 
         return body
 
+    def origin(self):
+        return self.scheme + "://" + self.host + ":" + str(self.port)
+
 COOKIE_JAR = {}
 
 @wbetools.patch(JSContext)
@@ -77,6 +80,8 @@ class JSContext:
 
     def XMLHttpRequest_send(self, method, url, body):
         full_url = self.tab.url.resolve(url)
+        if full_url.origin() != self.tab.url.origin():
+            raise Exception("Cross-origin XHR request not allowed")
         return full_url.request(body)
 
     def run(self, script, code):

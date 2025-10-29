@@ -12,6 +12,10 @@
 
 서버는 여러 개의 쿠키를 설정할 수 있고, 만료 날짜와 같은 매개변수도 설정할 수 있다.
 
+### 동일 출처 정책(Same-origin policy)
+
+XMLHttpRequest를 이용하면 서버의 웹페이지 콘텐츠가 다른 서버에서 온 웹페이지의 자바스크립트로 전달될 수 있다. 이를 악용하여 프라이빗 데이터에 접근할 수도 있다. 이와 같은 문제를 방지하기 위해 브라우저는 XMLHttpRequest와 같은 요청의 경우에 같은 origin, 다시 말해 같은 스킴, 같은 호스트명, 같은 포트를 가진 웹페이지만 전송을 허용한다.
+
 ## 실습
 
 - 실습용 서버에 쿠키 헤더 읽기/쓰기, 토큰 발급, 세션 저장 기능 추가
@@ -26,3 +30,6 @@
   - XMLHttpRequest 객체의 open 메서드를 구현한다. open 메서드는 요청 url, method를 초기화한다.
   - XMLHttpRequest 객체의 send 메서드를 구현한다. send 메서드는 body를 전달받고 전송한다. 전송에는 브라우저 런타임에서 익스포트하는 XMLHttpRequest_send 함수를 사용한다.
   - JSContext 클래스에 XMLHttpRequest_send 메서드를 추가한다. XMLHttpRequest_send 메서드는 URL 클래스의 request 메서드를 사용하여 요청을 전송하고 응답 본문을 반환한다.
+- 동일 출처 정책 구현
+  - URL 클래스에 origin을 반환하는 origin 메서드를 추가한다.
+  - XMLHttpRequest_send 메서드에서 현재 페이지의 URL과 요청 URL의 origin을 비교해서 동일하지 않다면 예외를 발생시킨다.

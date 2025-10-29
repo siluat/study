@@ -112,3 +112,15 @@ If cookies are present, they should be sent:
     b'GET /hello HTTP/1.0\r\nHost: about.blank\r\nCookie: foo=bar\r\n\r\n'
 
 Note that the cookie value is sent.
+
+Now let's see that cross-domain requests fail:
+
+    >>> url3 = "http://other.site/"
+    >>> test.socket.respond(url3, b"HTTP/1.0 200 OK\r\n\r\nPrivate")
+    >>> tab.js.run("test", xhrjs(url3)) #doctest: +ELLIPSIS
+    Script test crashed EvalError: Error while calling Python Function...: Exception('Cross-origin XHR request not allowed')
+        ...
+
+It's not important whether the request is _ever_ sent; the CORS
+exercise requires sending it but the standard implementation does not
+send it.
