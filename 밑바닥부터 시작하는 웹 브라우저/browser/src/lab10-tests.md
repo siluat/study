@@ -19,7 +19,7 @@ in the cookie jar:
     >>> test.socket.respond(url, b"HTTP/1.0 200 OK\r\nSet-Cookie: foo=bar\r\n\r\n")
     >>> browser.new_tab(lab10.URL(url))
     >>> lab10.COOKIE_JAR["test.test"]
-    'foo=bar'
+    ('foo=bar', {})
 
 Moreover, the browser should now send a `Cookie` header with future
 requests:
@@ -44,11 +44,11 @@ tabs should use the same cookie jar.
 Cookie values can be updated:
 
     >>> lab10.COOKIE_JAR["test.test"]
-    'foo=bar'
+    ('foo=bar', {})
     >>> test.socket.respond(url, b"HTTP/1.0 200 OK\r\nSet-Cookie: foo=baz\r\n\r\n")
     >>> browser.new_tab(lab10.URL(url))
     >>> lab10.COOKIE_JAR["test.test"]
-    'foo=baz'
+    ('foo=baz', {})
 
 The trailing slash is also optional:
 
@@ -64,7 +64,7 @@ Cookie parameters are parsed correctly:
     ...   b"Set-Cookie: foo=baz; HttpOnly; SameSite=Lax; Secure\r\n\r\n")
     >>> browser.new_tab(lab10.URL(url))
     >>> lab10.COOKIE_JAR["test.test"]
-    'foo=baz; HttpOnly; SameSite=Lax; Secure'
+    ('foo=baz', {'httponly': 'true', 'samesite': 'lax', 'secure': 'true'})
 
 Testing XMLHttpRequest
 ======================
@@ -105,7 +105,7 @@ Non-synchronous XHRs should fail:
 
 If cookies are present, they should be sent:
 
-    >>> lab10.COOKIE_JAR["about.blank"] = 'foo=bar'
+    >>> lab10.COOKIE_JAR["about.blank"] = ('foo=bar', {})
     >>> tab.js.run("test", xhrjs(url2))
     Hello!
     >>> test.socket.last_request(url2)
@@ -124,3 +124,65 @@ Now let's see that cross-domain requests fail:
 It's not important whether the request is _ever_ sent; the CORS
 exercise requires sending it but the standard implementation does not
 send it.
+
+Testing SameSite cookies and CSRF
+=================================
+
+`SameSite` cookies should be sent on cross-site `GET`s and
+same-site `POST`s but not on cross-site `POST`s.
+
+Cookie without `SameSite` have already been tested above. Let's create
+a `SameSite` cookie to start.
+
+    >>> url = "http://test.test/"
+    >>> test.socket.respond(url, b"HTTP/1.0 200 OK\r\nSet-Cookie: bar=baz; SameSite=Lax\r\n\r\n")
+    >>> tab.load(lab10.URL(url))
+    >>> lab10.COOKIE_JAR["test.test"]
+    ('bar=baz', {'samesite': 'lax'})
+
+Now the browser should have `bar=baz` as a `SameSite` cookie for
+`test.test`. First, let's check that it's sent in a same-site `GET`
+request:
+
+    >>> url2 = "http://test.test/2"
+    >>> test.socket.respond(url2, b"HTTP/1.0 200 OK\r\n\r\n2")
+    >>> tab.load(lab10.URL(url2))
+    >>> test.socket.last_request(url2)
+    b'GET /2 HTTP/1.0\r\nHost: test.test\r\nCookie: bar=baz\r\n\r\n'
+
+Now let's submit a same-site `POST` and check that it's also sent
+there:
+
+    >>> url3 = "http://test.test/add"
+    >>> test.socket.respond(url3, b"HTTP/1.0 200 OK\r\n\r\nAdded!", method="POST")
+    >>> tab.load(lab10.URL(url3), payload="who=me")
+    >>> test.socket.last_request(url3)
+    b'POST /add HTTP/1.0\r\nHost: test.test\r\nCookie: bar=baz\r\nContent-Length: 6\r\n\r\nwho=me'
+
+Now we navigate to another site, navigate back by `GET`, and the
+cookie should *still* be sent:
+
+    >>> url4 = "http://other.site/"
+    >>> test.socket.respond(url4, b"HTTP/1.0 200 OK\r\n\r\nHi!")
+    >>> tab.load(lab10.URL(url4))
+    >>> tab.load(lab10.URL(url))
+    >>> test.socket.last_request(url)
+    b'GET / HTTP/1.0\r\nHost: test.test\r\nCookie: bar=baz\r\n\r\n'
+
+Finally, let's try a cross-site `POST` request and check that in this
+case the cookie is *not* sent:
+
+    >>> tab.load(lab10.URL(url4))
+    >>> tab.load(lab10.URL(url3), payload="who=me")
+    >>> test.socket.last_request(url3)
+    b'POST /add HTTP/1.0\r\nHost: test.test\r\nContent-Length: 6\r\n\r\nwho=me'
+
+The same-site check should ignore ports, so if the hosts are the same
+but the ports differ, the cookie should be sent:
+
+    >>> tab.load(lab10.URL(url))
+    >>> url5 = "http://test.test:8000/test"
+    >>> test.socket.respond(url5, b"HTTP/1.0 200 OK\r\n\r\nHi!", method="POST")
+    >>> tab.load(lab10.URL(url5), payload="who=me")
+    >>> test.socket.last_request(url5)
+    b'POST /test HTTP/1.0\r\nHost: test.test\r\nCookie: bar=baz\r\nContent-Length: 6\r\n\r\nwho=me'
