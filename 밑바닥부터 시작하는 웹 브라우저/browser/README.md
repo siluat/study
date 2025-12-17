@@ -251,3 +251,18 @@ python3 lab9.py http://localhost:8000/
   - HTTP 1.0 프로토콜을 지원한다.
   - HTML 문서를 문서 트리로 구조화하여 처리한다.
   - 레이아웃 트리를 구성하여 각 요소의 크기와 위치를 계산한다.
+
+### Chapter 10 버전
+
+```bash
+cd src
+python3 server10.py  # 헬프 서버 실행, 추가한 API 동작 확인을 위한 localhost 페이지에 접근할 때 필요
+python3 lab10.py http://localhost:8000/
+```
+
+- 추가된 기능
+  - 쿠키 관리 및 전송
+  - 동기식 XMLHttpRequest
+  - 동일 출처 정책 처리
+  - SameSite=Lax 쿠키 처리
+  - Content-Security-Policy: default-src 처리
