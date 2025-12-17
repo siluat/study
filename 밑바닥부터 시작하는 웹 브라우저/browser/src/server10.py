@@ -1,3 +1,4 @@
+import html
 import socket
 import urllib.parse
 import random
@@ -35,6 +36,8 @@ def handle_connection(conx):
     if "cookie" not in headers:
         template = "Set-Cookie: token={}; SameSite=Lax\r\n"
         response += template.format(token)
+    csp = "default-src http://localhost:8000"
+    response += "Content-Security-Policy: {}\r\n".format(csp)
     response += "\r\n" + body
     conx.send(response.encode('utf8'))
     conx.close()
@@ -92,8 +95,8 @@ def show_comments(session):
         out += "<a href=/login>Sign in to write in the guest book</a>"
 
     for entry, who in ENTRIES:
-        out += "<p>" + entry + "\n"
-        out += "<i>by " + who + "</i></p>"
+        out += "<p>" + html.escape(entry) + "\n"
+        out += "<i>by " + html.escape(who) + "</i></p>"
 
     out += "<link rel=stylesheet href=/comment.css>"
     out += "<strong></strong>"

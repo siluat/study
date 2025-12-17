@@ -98,6 +98,8 @@ class JSContext:
 
     def XMLHttpRequest_send(self, method, url, body):
         full_url = self.tab.url.resolve(url)
+        if not self.tab.allowed_request(full_url):
+            raise Exception("Cross-origin XHR blocked by CSP")
         headers, out = full_url.request(self.tab.url,body)
         if full_url.origin() != self.tab.url.origin():
             raise Exception("Cross-origin XHR request not allowed")
@@ -116,11 +118,24 @@ class JSContext:
 
 @wbetools.patch(Tab)
 class Tab:
+    def allowed_request(self, url):
+        return self.allowed_origins == None or \
+            url.origin() in self.allowed_origins
+
     def load(self, url, payload=None):
         headers, body = url.request(self.url, payload)
         self.scroll = 0
         self.url = url
         self.history.append(url)
+
+        self.allowed_origins = None
+        if "content-security-policy" in headers:
+            csp = headers["content-security-policy"].split()
+            if len(csp) > 0 and csp[0] == "default-src":
+                self.allowed_origins = []
+                for origin in csp[1:]:
+                    self.allowed_origins.append(URL(origin).origin())
+
         self.nodes = HTMLParser(body).parse()
 
         self.js = JSContext(self)
@@ -131,6 +146,9 @@ class Tab:
                     and "src" in node.attributes]
         for script in scripts:
             script_url = url.resolve(script)
+            if not self.allowed_request(script_url):
+                print("Blocked script", script, "due to CSP")
+                continue
             try:
                 header, body = script_url.request(url)
             except:
@@ -146,6 +164,9 @@ class Tab:
                     and "href" in node.attributes]
         for link in links:
             style_url = url.resolve(link)
+            if not self.allowed_request(style_url):
+                print("Blocked style", link, "due to CSP")
+                continue
             try:
                 header, body = style_url.request(url)
             except:
