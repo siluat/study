@@ -39,6 +39,10 @@
     "security.md": {
       "lab": "lab10.py",
       "tests": "lab10-tests.md"
+    },
+    "visual-effects.md": {
+      "lab": "lab11.py",
+      "tests": "lab11-tests.md"
     }
   }
 }
