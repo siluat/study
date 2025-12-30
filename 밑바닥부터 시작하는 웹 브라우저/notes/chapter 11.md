@@ -22,4 +22,5 @@
   - Tkinter 윈도우 대신 SDL 윈도우를 만들어 사용한다. Skia는 입력을 처리하거나 그래픽 윈도우 창을 생성하지 않기 때문에 SDL GUI 라이브러리를 함께 사용한다.
   - SDL에는 mainloop와 bind가 없으므로 이벤트 처리를 위한 mainloop 함수를 직접 구현해서 사용한다.
   - Skia가 브라우저 크롬과 페이지 콘텐츠를 그릴 서피스를 Browser 클래스의 root_surface 속성에 생성한다.
+  - CSS의 색 표현을 skia 서피스에 그리기 위한 CSS 색 표현 -> Skia 색 변환 함수 parse_color를 구현한다.
   - Browser 클래스의 draw 메서드에서는 Skia 서피스를 SDL 서피스로 복사하는 처리를 추가한다.
