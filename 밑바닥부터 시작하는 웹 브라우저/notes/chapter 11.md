@@ -25,3 +25,4 @@
   - CSS의 색 표현을 skia 서피스에 그리기 위한 CSS 색 표현 -> Skia 색 변환 함수 parse_color를 구현한다.
   - Browser 클래스의 draw 메서드에서는 Skia 서피스를 SDL 서피스로 복사하는 처리를 추가한다.
   - 폰트 메트릭과 측정값에 Tkinter가 아닌 Skia의 폰트 객체를 사용하도록 get_font 함수를 재정의하고 linespace 유틸 함수를 추가한다.
+  - Chrome 객체에서 사용하는 폰트와 Rect를 Skia 방식으로 변경한다.
