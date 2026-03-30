@@ -1,0 +1,48 @@
+{
+  "chapters": {
+    "http.md": {
+      "lab": "lab1.py",
+      "tests": "lab1-tests.md"
+    },
+    "graphics.md": {
+      "lab": "lab2.py",
+      "tests": "lab2-tests.md"
+    },
+    "text.md": {
+      "lab": "lab3.py",
+      "tests": "lab3-tests.md"
+    },
+    "html.md": {
+      "lab": "lab4.py",
+      "tests": "lab4-tests.md"
+    },
+    "layout.md": {
+      "lab": "lab5.py",
+      "tests": "lab5-tests.md"
+    },
+    "style.md": {
+      "lab": "lab6.py",
+      "tests": "lab6-tests.md"
+    },
+    "chrome.md": {
+      "lab": "lab7.py",
+      "tests": "lab7-tests.md"
+    },
+    "forms.md": {
+      "lab": "lab8.py",
+      "tests": "lab8-tests.md"
+    },
+    "scripts.md": {
+      "lab": "lab9.py",
+      "tests": "lab9-tests.md"
+    },
+    "security.md": {
+      "lab": "lab10.py",
+      "tests": "lab10-tests.md"
+    },
+    "visual-effects.md": {
+      "lab": "lab11.py",
+      "tests": "lab11-tests.md"
+    }
+  }
+}

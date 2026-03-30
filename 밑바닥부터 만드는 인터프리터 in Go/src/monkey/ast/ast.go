@@ -59,6 +59,7 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
+
 type Program struct {
 	Statements []Statement
 }
